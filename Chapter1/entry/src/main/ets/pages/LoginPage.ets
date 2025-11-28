@@ -2,7 +2,18 @@ import { userMsg } from '../model/model';
 import { vaildForm } from '../utils/validform';
 //导入及时反馈模块
 import { PromptAction } from '@kit.ArkUI';
-// import { PromptAction } from '@ohos.arkui.UIContext';
+import { request } from '../api/request';
+//导入测试网络请求模块
+import { hitokoto } from '../api/api';
+
+//调用网络请求 测试一言
+hitokoto()
+  .then(res=>{
+    console.log("成功=>",JSON.stringify(res.result))
+  })
+  .catch((err:object)=>{
+    console.log("错误=>",JSON.stringify(err))
+  })
 
 @Entry
 @Component
@@ -85,6 +96,7 @@ struct LoginPage {
         .margin({ top: 40 })
         .onClick((event: ClickEvent) => {
           console.log("手机号.密码,昵称=>", this.regPhone, this.regPassword, this.regNickName)
+
 
 
           // //接口:约束对象格式

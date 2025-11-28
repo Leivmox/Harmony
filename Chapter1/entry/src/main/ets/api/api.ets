@@ -1,22 +1,13 @@
-//网络请求接口
-//1.导入http模块
-import { http } from '@kit.NetworkKit'
 
-//2.创建一个请求实例(一个请求实例对应一个网络请求,请求完成,对应的实例要销毁)
-let httpRequest = http.createHttp();
+//网络请求接口:移动到request.ets
+import { request } from './request'
+import { http } from '@kit.NetworkKit';
 
-//3.用请求实例 发起网络请求
-httpRequest.request("",{
-  method: http.RequestMethod.GET,
-  //请求头
-  header:{
-    "Content-Type":"application/json"
-  },
-
-  //请求参数
-  extraData:{},
-
-  //返回的数据结构
-  expectDataType: http.HttpDataType.OBJECT
-
-})
+//测试接口
+export function hitokoto(): Promise<http.HttpResponse>{
+  return request("https://v1.hitokoto.cn","get","");
+}
+//注册接口
+//登录接口
+//轮播图接口
+//商品数据接口
