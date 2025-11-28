@@ -4,16 +4,16 @@ import { vaildForm } from '../utils/validform';
 import { PromptAction } from '@kit.ArkUI';
 import { request } from '../api/request';
 //导入测试网络请求模块
-import { hitokoto } from '../api/api';
+import { hitokoto, register } from '../api/api';
 
-//调用网络请求 测试一言
-hitokoto()
-  .then(res=>{
-    console.log("成功=>",JSON.stringify(res.result))
-  })
-  .catch((err:object)=>{
-    console.log("错误=>",JSON.stringify(err))
-  })
+// //调用网络请求 测试一言
+// hitokoto()
+//   .then(res=>{
+//     console.log("成功=>",JSON.stringify(res.result))
+//   })
+//   .catch((err:object)=>{
+//     console.log("错误=>",JSON.stringify(err))
+//   })
 
 @Entry
 @Component
@@ -169,6 +169,7 @@ struct LoginPage {
           let vaild_result: boolean = vaildForm(reg_user_msg, this.promptAction)
           if (vaild_result) {
             //真正的注册功能
+            register(this.regPhone,this.regPassword,this.regNickName)
           }
 
         })
