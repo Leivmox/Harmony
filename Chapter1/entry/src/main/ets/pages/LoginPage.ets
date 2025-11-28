@@ -150,10 +150,11 @@ struct LoginPage {
           // }
 
 
-          this.promptAction.showToast({
-            message:"测试吐司"
-          })
-          let vaild_result: boolean = vaildForm(reg_user_msg)
+          // this.promptAction.showToast({
+          //   message:"测试吐司"
+          // })
+
+          let vaild_result: boolean = vaildForm(reg_user_msg, this.promptAction)
           if (vaild_result) {
             //真正的注册功能
           }

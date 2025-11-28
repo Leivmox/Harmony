@@ -1,10 +1,12 @@
 import { userMsg, rule } from '../model/model';
+import { PromptAction } from '@kit.ArkUI';
+
 // import { PromptAction } from '@ohos.arkui.UIContext';
 //
 // let PromptAction = this.get
 
 // 表单验证
-export function vaildForm(vaild_obj:userMsg): boolean {
+export function vaildForm(vaild_obj:userMsg, promptAction: PromptAction): boolean {
 
   //开始验证
   //获取对象的 key,确定要验证的输入框
@@ -26,6 +28,8 @@ export function vaildForm(vaild_obj:userMsg): boolean {
     if (!obj.regexpRule.test(obj.val)) {
       //某个输入框不通过,输出当前错误信息,flag假设不成立,跳出循环
       console.log(obj.errMsg);
+      //显示错误信息
+      promptAction.showToast({message: obj.errMsg})
       flag = false;
       break;
     }
