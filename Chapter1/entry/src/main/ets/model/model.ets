@@ -15,3 +15,11 @@ export interface rule {
   regexpRule: RegExp, //当前属性的匹配规则
   errMsg: string //当前属性的错误信息(验证不通过的提示)
 }
+
+
+//tabBar所需的数据
+export interface tabBarDataItemType{
+  title: string
+  img:Resource
+  img_active: Resource
+}

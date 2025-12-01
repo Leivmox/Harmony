@@ -23,7 +23,7 @@ export function register(phone: string, password: string, nickName: string): Pro
 }
 
 //登录接口
-export function login(phone: string, password: string, nickName: string): Promise<http.HttpResponse> {
+export function login(phone: string, password: string): Promise<http.HttpResponse> {
 
   //发起网络请求
   return request("https://kf.webxyq.com/login", "post", Object({

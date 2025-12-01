@@ -1,10 +1,9 @@
 import { userMsg } from '../model/model';
 import { vaildForm } from '../utils/validform';
 //导入及时反馈模块
-import { PromptAction } from '@kit.ArkUI';
-import { request } from '../api/request';
+import { PromptAction, router } from '@kit.ArkUI';
 //导入测试网络请求模块
-import { hitokoto, login, register } from '../api/api';
+import { login, register } from '../api/api';
 
 // //调用网络请求 测试一言
 // hitokoto()
@@ -28,12 +27,10 @@ struct LoginPage {
   @State regNickName: string = "11";
   // 1. 定义一个是否显示注册模态转场: @State 状态变量，初始为 false (隐藏)
   @State showSheet: boolean = false;
-
-
   // let promptAction:PromptAction = this.getUIContest();
 
   //创建及时反馈
-  private promptAction:PromptAction = this.getUIContext().getPromptAction();
+  private promptAction: PromptAction = this.getUIContext().getPromptAction();
 
   // //自定义构建函数
   // @Builder
@@ -96,7 +93,6 @@ struct LoginPage {
         .margin({ top: 40 })
         .onClick((event: ClickEvent) => {
           console.log("手机号.密码,昵称=>", this.regPhone, this.regPassword, this.regNickName)
-
 
 
           // //接口:约束对象格式
@@ -169,18 +165,18 @@ struct LoginPage {
           let vaild_result: boolean = vaildForm(reg_user_msg, this.promptAction)
           if (vaild_result) {
             //真正的注册功能
-            register(this.regPhone,this.regPassword,this.regNickName)
-              .then(res=>{
-                console.log("注册的结果 =>",JSON.stringify(res.result))
+            register(this.regPhone, this.regPassword, this.regNickName)
+              .then(res => {
+                console.log("注册的结果 =>", JSON.stringify(res.result))
                 this.promptAction.showToast({
                   message: Object(res).result.msg
                 })
-                if(Object(res).result.code == 100){
+                if (Object(res).result.code == 100) {
                   this.showSheet = false;
                 }
               })
-              .catch((err:object)=>{
-                console.log("失败 =>",JSON.stringify(err))
+              .catch((err: object) => {
+                console.log("失败 =>", JSON.stringify(err))
               })
           }
 
@@ -214,6 +210,11 @@ struct LoginPage {
         Text("巴巴博一")
           .fontColor($r("app.color.theme_color"))
           .fontWeight(FontWeight.Bold)
+          .onClick(() => {
+            router.pushUrl({
+              url: "pages/Index"
+            })
+          })
       }
 
       .padding({
@@ -295,7 +296,21 @@ struct LoginPage {
             let vaild_result: boolean = vaildForm(login_user_msg, this.promptAction)
             //调用登录接口
             if (vaild_result) {
+
               //真正的登录逻辑
+              login(this.userPhone, this.userPassword)
+                .then(res => {
+                  this.promptAction.showToast({
+                    message: Object(res).result.msg
+                  })
+                  if (Object(res).result.code == 200) {
+
+                    //跳转到首页 router
+                    router.pushUrl({
+                      url: "pages/Index"
+                    })
+                  }
+                })
 
 
             }
