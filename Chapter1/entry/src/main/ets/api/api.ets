@@ -23,5 +23,13 @@ export function register(phone: string, password: string, nickName: string): Pro
 }
 
 //登录接口
+export function login(phone: string, password: string, nickName: string): Promise<http.HttpResponse> {
+
+  //发起网络请求
+  return request("https://kf.webxyq.com/login", "post", Object({
+    phone,
+    password
+  }))
+}
 //轮播图接口
 //商品数据接口

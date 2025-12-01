@@ -4,7 +4,7 @@ import { vaildForm } from '../utils/validform';
 import { PromptAction } from '@kit.ArkUI';
 import { request } from '../api/request';
 //导入测试网络请求模块
-import { hitokoto, register } from '../api/api';
+import { hitokoto, login, register } from '../api/api';
 
 // //调用网络请求 测试一言
 // hitokoto()
@@ -20,12 +20,12 @@ import { hitokoto, register } from '../api/api';
 struct LoginPage {
   @State message: string = "Hello World!";
   //登录表单的用户信息
-  @State userPhone: string = "12345678";
-  @State userpassword: string = "12345678";
+  @State userPhone: string = "13333333333";
+  @State userPassword: string = "a12345";
   //注册表单的用户信息
-  @State regPhone: string = "";
-  @State regPassword: string = "";
-  @State regNickName: string = "";
+  @State regPhone: string = "13333333333";
+  @State regPassword: string = "a12345";
+  @State regNickName: string = "11";
   // 1. 定义一个是否显示注册模态转场: @State 状态变量，初始为 false (隐藏)
   @State showSheet: boolean = false;
 
@@ -170,6 +170,18 @@ struct LoginPage {
           if (vaild_result) {
             //真正的注册功能
             register(this.regPhone,this.regPassword,this.regNickName)
+              .then(res=>{
+                console.log("注册的结果 =>",JSON.stringify(res.result))
+                this.promptAction.showToast({
+                  message: Object(res).result.msg
+                })
+                if(Object(res).result.code == 100){
+                  this.showSheet = false;
+                }
+              })
+              .catch((err:object)=>{
+                console.log("失败 =>",JSON.stringify(err))
+              })
           }
 
         })
@@ -234,9 +246,11 @@ struct LoginPage {
       Column() {
         // this.myPhoneInput()
 
-        this.myInput("手机号", this.userPhone, InputType.PhoneNumber, () => {
+        this.myInput("手机号", this.userPhone, InputType.PhoneNumber, (val) => {
+          this.userPhone = val;
         })
-        this.myInput("密码", this.userpassword, InputType.Password, () => {
+        this.myInput("密码", this.userPassword, InputType.Password, (val) => {
+          this.userPassword = val;
         })
 
         // Row({ space: 25 }) {
@@ -260,6 +274,31 @@ struct LoginPage {
           .borderRadius(25)
           .background(Color.White)
           .onClick((even: ClickEvent) => {
+            console.log("点击登录");
+            //登录功能
+            //构建一个 用户登录信息的对象 用于表单验证
+            let login_user_msg: userMsg = {
+              phone: {
+                val: this.userPhone,
+                regexpRule: new RegExp("^1[3-9]\\d{9}$"),
+                errMsg: "手机号格式不正确"
+              },
+              password: {
+                val: this.userPassword,
+                regexpRule: new RegExp("^[A-Za-z]\\w{5,15}$"),
+                errMsg: "密码格式不正确,需以字母开头,包含字母数字和下划线,6~16位",
+              }
+
+            }
+
+            //开始验证
+            let vaild_result: boolean = vaildForm(login_user_msg, this.promptAction)
+            //调用登录接口
+            if (vaild_result) {
+              //真正的登录逻辑
+
+
+            }
           })
         Button("注册")
           .width("100%")

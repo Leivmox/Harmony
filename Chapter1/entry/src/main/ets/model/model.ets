@@ -5,7 +5,7 @@
 export interface userMsg {//用export导出
   phone: rule,
   password: rule,
-  nickname: rule
+  nickname?: rule
 
 }
 
