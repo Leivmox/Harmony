@@ -4,6 +4,10 @@
     "type": "entry",
     "description": "$string:module_desc",
     "mainElement": "EntryAbility",
+    //添加网络请求权限
+    "requestPermissions": [{
+      "name":"ohos.permission.INTERNET"
+    }],
     "deviceTypes": [
       "phone"
     ],
@@ -43,7 +47,7 @@
             "name": "ohos.extension.backup",
             "resource": "$profile:backup_config"
           }
-        ],
+        ]
       }
     ]
   }

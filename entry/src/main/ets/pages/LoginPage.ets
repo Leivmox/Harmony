@@ -1,9 +1,13 @@
-import { userMsg } from '../model/model';
-import { vaildForm } from '../utils/validform';
+//导入数据格式
+import { userMsg } from "../model/model"
+//导入表单验证模块
+import { validForm } from "../utils/validForm"
 //导入及时反馈模块
-import { PromptAction, router } from '@kit.ArkUI';
-//导入测试网络请求模块
-import { login, register } from '../api/api';
+import { PromptAction, router } from "@kit.ArkUI";
+//导入注册,登录接口
+import { register,login } from "../api/api";
+import { saveStorage } from "../utils/storage";
+
 
 // //调用网络请求 测试一言
 // hitokoto()
@@ -17,40 +21,31 @@ import { login, register } from '../api/api';
 @Entry
 @Component
 struct LoginPage {
-  @State message: string = "Hello World!";
-  //登录表单的用户信息
-  @State userPhone: string = "13333333333";
-  @State userPassword: string = "a12345";
+  //状态变量：数据变化会驱动视图更新
+  //是否显示模态页面转场
+  @State isShowSheet: boolean = false;
+  //登录表单用户信息
+  @State userPhone: string = "13546827857"
+  @State userPassword: string = "q12345"
   //注册表单的用户信息
-  @State regPhone: string = "13333333333";
-  @State regPassword: string = "a12345";
-  @State regNickName: string = "11";
-  // 1. 定义一个是否显示注册模态转场: @State 状态变量，初始为 false (隐藏)
-  @State showSheet: boolean = false;
-  // let promptAction:PromptAction = this.getUIContest();
-
-  //创建及时反馈
+  @State regPhone: string = "13546827857";
+  @State regPassword: string = "q12345";
+  @State regNickName: string = "zq";
+  //创建即使反馈对象
   private promptAction: PromptAction = this.getUIContext().getPromptAction();
 
-  // //自定义构建函数
-  // @Builder
-  // myPhoneInput() {
-  //   Row({ space: 25 }) {
-  //     Text("手机号").width(50)
-  //     TextInput({ placeholder: "手机号" })
-  //       .type(InputType.PhoneNumber)
-  //       .layoutWeight(1)
-  //       .backgroundColor(Color.Transparent)
-  //   }
-  //   .myInputStyle()
-  // }
-
-  //自定义构建函数
+  /**
+   * @description 自定义构建函数--手机号输入框
+   * @param label 输入框的描述
+   * @param val 输入框的值
+   * @param type 输入框的类型
+   * @param fn onCharge实践的回调函数
+   */
   @Builder
-  myInput(label: string, val: string, type: InputType, fn: (value: string) => void) {
+  myPhoneInput(label: string, val: string, type: InputType, fn: (val: string) => void) {
     Row({ space: 25 }) {
       Text(label).width(50)
-      TextInput({ placeholder: label, text: val })
+      TextInput({ placeholder: label })
         .type(type)
         .layoutWeight(1)
         .backgroundColor(Color.Transparent)
@@ -59,134 +54,88 @@ struct LoginPage {
     .myInputStyle()
   }
 
-  //半模态转场内容
+  /**
+   * @description 自定义构建函数 -- 半模态页面的内容
+   */
   @Builder
   customSheet() {
     Column() {
+      //顶部标题
       Row() {
-        Text("注册")
-          .fontSize(30)
-        Text("×")
-          .fontSize(20)
+        Text("注册").fontSize(30)
+        Text("x").fontSize(20)
       }
-      .width('100%')
+      .width("100%")
       .justifyContent(FlexAlign.SpaceBetween)
 
+      //中间的输入框
       Column() {
-        this.myInput("手机号", this.regPhone, InputType.PhoneNumber, (val) => {
-          this.regPhone = val;
+        this.myPhoneInput("手机号", this.regPhone, InputType.PhoneNumber, (val) => {
+          this.regPhone = val; //输入的手机号赋值给变量 regPhone
         })
-        this.myInput("密码", this.regPassword, InputType.Password, (val) => {
-          this.regPassword = val;
+        this.myPhoneInput("密码", this.regPassword, InputType.Password, (val) => {
+          this.regPassword = val; //输入的密码赋值给变量 regPassword
         })
-        this.myInput("昵称", this.regNickName, InputType.Normal, (val) => {
-          this.regNickName = val;
+        this.myPhoneInput("昵称", this.regNickName, InputType.Normal, (val) => {
+          this.regNickName = val; //输入的昵称赋值给变量 regNickName
         })
-      }
-      .margin({
-        top: 30
-      })
+      }.margin({ top: 30 })
 
-      //半模态页面的底部注册按钮
+      //底部注册按钮
       Button("注册")
         .width("100%")
         .margin({ top: 40 })
         .onClick((event: ClickEvent) => {
-          console.log("手机号.密码,昵称=>", this.regPhone, this.regPassword, this.regNickName)
+          console.log("手机号，密码。昵称 =>", this.regPhone, this.regPassword, this.regNickName)
 
 
-          // //接口:约束对象格式
-          // interface userMsg {
-          //   phone: rule,
-          //   password: rule,
-          //   nickname: rule
-          //
-          // }
-          //
-          // //定义一个接口,
-          // interface rule {
-          //   val: string, //当前属性原本的值
-          //   regexpRule: RegExp, //当前属性的匹配规则
-          //   errMsg: string //当前属性的错误信息(验证不通过的提示)
-          // }
-
-          //构建一个 用户注册信息的对象 用于表单验证
+          //构建一个 用户注册的信息对象  用于表单验证
           let reg_user_msg: userMsg = {
             phone: {
               val: this.regPhone,
               regexpRule: new RegExp("^1[3-9]\\d{9}$"),
-              errMsg: "手机号格式不正确"
+              errMsg: "手机号码格式不正确"
             },
             password: {
               val: this.regPassword,
               regexpRule: new RegExp("^[A-Za-z]\\w{5,15}$"),
-              errMsg: "密码格式不正确,需以字母开头,包含字母数字和下划线,6~16位",
+              errMsg: "密码以字母开头，可以是字母数字下划线，6到16位"
             },
-            nickname: {
+            nickName: {
               val: this.regNickName,
-              regexpRule: new RegExp("^[\\w\u4e00-\u9fa5]{1,10}$"),
-              errMsg: "昵称格式不正确, 需字母中文或下划线,长度1~10位",
+              regexpRule: new RegExp("^[\\w\u4e00-\u9fa5]{1,10}"),
+              errMsg: "昵称有字母数字下划线中文，长度1到10位"
             }
           }
+          //验证表单(要验证的表单数据对象，即使反馈对象)
+          let valid_result: boolean = validForm(reg_user_msg, this.promptAction);
 
-          // //开始验证
-          // //获取对象的 key,确定要验证的输入框
-          // let keys: string[] = Object.keys(reg_user_msg); //拿到了对象键名的字符串数组
-          //
-          // //假设所有表单都验证通过
-          // let flag: boolean = true;
-          //
-          // for (const item of keys) {
-          //   // console.log("对象的键名=> ", item);
-          //
-          //   // console.log("当前属性的值", JSON.stringify(Object(reg_user_msg)[item]));
-          //
-          //   //拿到当前属性的值(子对象)
-          //   let obj: rule = Object(reg_user_msg)[item];
-          //
-          //   //验证值是否符合规则  => 语法:正则.test("要验证的值")
-          //   if (!obj.regexpRule.test(obj.val)) {
-          //     //某个输入框不通过,输出当前错误信息,flag假设不成立,跳出循环
-          //     console.log(obj.errMsg);
-          //     flag = false;
-          //     break;
-          //   }
-          // }
-          // if(flag){
-          //   console.log("表单验证通过")
-          //   //真正的注册逻辑
-          // }
-
-
-          // this.promptAction.showToast({
-          //   message:"测试吐司"
-          // })
-
-          let vaild_result: boolean = vaildForm(reg_user_msg, this.promptAction)
-          if (vaild_result) {
+          //如果表单验证通过
+          if (valid_result) {
             //真正的注册功能
             register(this.regPhone, this.regPassword, this.regNickName)
               .then(res => {
-                console.log("注册的结果 =>", JSON.stringify(res.result))
+                console.log("注册的结果是=>", JSON.stringify(res.result))
+                //Toast 显示注册结果
                 this.promptAction.showToast({
                   message: Object(res).result.msg
                 })
+                //如果注册成功
                 if (Object(res).result.code == 100) {
-                  this.showSheet = false;
+                  // 关闭模态页面
+                  this.isShowSheet = false
                 }
               })
               .catch((err: object) => {
-                console.log("失败 =>", JSON.stringify(err))
+                console.log(JSON.stringify(err))
               })
           }
-
         })
-
-
     }
     .padding(20)
   }
 
+  //通用样式封装
   @Styles
   myInputStyle(){
     .margin({ left: 10, right: 10 })
@@ -204,140 +153,128 @@ struct LoginPage {
         Image($r("app.media.home_active"))
           .width(50)
           .height(50)
+
         Text("Luckin Coffee")
           .layoutWeight(1)
           .fontWeight(FontWeight.Bold)
-        Text("巴巴博一")
+
+        Text("先逛一逛")
           .fontColor($r("app.color.theme_color"))
           .fontWeight(FontWeight.Bold)
-          .onClick(() => {
+          .onClick(()=>{
             router.pushUrl({
-              url: "pages/Index"
+              url:"pages/Index"
             })
           })
       }
-
       .padding({
         left: 20,
         right: 20
       })
 
+
+      //欢迎信息
       Column({ space: 30 }) {
         Text("欢迎回来！")
           .fontSize(40)
         Text("Please login to your accounts")
-          .fontSize(18)
-          .fontColor(Color.Gray)
+          .fontSize(22)
       }
       .width("100%")
-      .margin({
-        top: 80,
-        bottom: 80
-      })
+      .margin({ top: 80, bottom: 80 })
+      .padding({ left: 10, right: 10 })
       .alignItems(HorizontalAlign.Start)
-      .padding({
-        left: 10,
-        right: 10
-
-      })
-
-      // .backgroundColor(Color.Pink)
 
       //登录表单
-      Column() {
-        // this.myPhoneInput()
+      Column(){
+      //手机号码
+      this.myPhoneInput("手机号", this.userPhone, InputType.PhoneNumber, (val) => {
+        this.userPhone = val;
+      })
 
-        this.myInput("手机号", this.userPhone, InputType.PhoneNumber, (val) => {
-          this.userPhone = val;
-        })
-        this.myInput("密码", this.userPassword, InputType.Password, (val) => {
-          this.userPassword = val;
-        })
+      //密码
+      this.myPhoneInput("密码", this.userPassword, InputType.Password, (val) => {
+        this.userPassword = val;
+      })
 
-        // Row({ space: 25 }) {
-        //   Text("密码").width(50)
-        //   TextInput({ placeholder: "密码" })
-        //     .type(InputType.Password)
-        //     .layoutWeight(1)
-        //     .backgroundColor(Color.Transparent)
-        // }
-        // .myInputStyle()
+      //忘记密码
+      Text("忘记密码？")
+        .width("100%")
+        .margin({ top: 20 })
+        .textAlign(TextAlign.End)
+        .fontColor(Color.Gray)
 
-        Text("忘记密码？")
-          .width("100%")
-          .margin({ top: 20 })
-          .textAlign(TextAlign.End)
-          .fontColor(Color.Gray)
-        Button("登录")
-          .width("100%")
-          .height(50)
-          .margin({ top: 50 })
-          .borderRadius(25)
-          .background(Color.White)
-          .onClick((even: ClickEvent) => {
-            console.log("点击登录");
-            //登录功能
-            //构建一个 用户登录信息的对象 用于表单验证
-            let login_user_msg: userMsg = {
-              phone: {
-                val: this.userPhone,
-                regexpRule: new RegExp("^1[3-9]\\d{9}$"),
-                errMsg: "手机号格式不正确"
-              },
-              password: {
-                val: this.userPassword,
-                regexpRule: new RegExp("^[A-Za-z]\\w{5,15}$"),
-                errMsg: "密码格式不正确,需以字母开头,包含字母数字和下划线,6~16位",
-              }
+      Button("登录")
+        .width("100%")
+        .height(50)
+        .margin({ top: 50 })
+        .borderRadius(25)
+        .onClick((event: ClickEvent) => {
+          //表单验证
+          //构建一个 用户注册的信息对象  用于表单验证
+          let login_user_msg: userMsg = {
+            phone: {
+              val: this.userPhone,
+              regexpRule: new RegExp("^1[3-9]\\d{9}$"),
+              errMsg: "手机号码格式不正确"
+            },
+            password: {
+              val: this.userPassword,
+              regexpRule: new RegExp("^[A-Za-z]\\w{5,15}$"),
+              errMsg: "密码以字母开头，可以是字母数字下划线，6到16位"
+            },
+          }
+          //开始验证
+          let valid_result: boolean = validForm(login_user_msg, this.promptAction);
+          //验证通过,调用登录接口
+          if (valid_result) {
+            //真正的登录逻辑
+            login(this.userPhone,this.userPassword)
+              .then(res=>{
+                console.log("登录接口请求成功=>",JSON.stringify(Object(res).result))
 
-            }
-
-            //开始验证
-            let vaild_result: boolean = vaildForm(login_user_msg, this.promptAction)
-            //调用登录接口
-            if (vaild_result) {
-
-              //真正的登录逻辑
-              login(this.userPhone, this.userPassword)
-                .then(res => {
-                  this.promptAction.showToast({
-                    message: Object(res).result.msg
-                  })
-                  if (Object(res).result.code == 200) {
-
-                    //跳转到首页 router
-                    router.pushUrl({
-                      url: "pages/Index"
-                    })
-                    //TODO.. 储存用户token
-                  }
+                //Toast显示登录结果
+                this.promptAction.showToast({
+                  message:Object(res).result.msg
                 })
+                //登陆成功
+                if (Object(res).result.code == 200) {
+                  //跳转到首页router
+                  router.pushUrl({
+                    url: "pages/Index"
+                  })
 
+                  //持久化存储 登录状态token
+                  let key:string = "user_token";
+                  let val :string = Object(res).result.token
+                  saveStorage(key,val)
+                }
+              })
+          }
+          })
+        }
 
-            }
-          })
-        Button("注册")
-          .width("100%")
-          .height(50)
-          .margin({ top: 20 })
-          .backgroundColor(Color.White)
-          .fontColor("#888")
-          .border({
-            width: 1,
-            color: "#ddd"
-          })
-          .borderRadius(25)
-          .onClick((even: ClickEvent) => {
-            this.showSheet = true;
-          })
-          // .bindSheet(true, this.customSheet(), {
-          .bindSheet($$this.showSheet, this.customSheet(), {
-            height: "50%",
-            showClose: false
-          })
-
-      }
-
+          Button("注册")
+            .width("100%")
+            .height(50)
+            .margin({ top: 50 })
+            .borderRadius(25)
+            .fontColor("#888")
+            .backgroundColor(Color.White)
+            .border({
+              width: 1,
+              color: "#ddd"
+            })
+            .onClick((event: ClickEvent) => {
+              //显示注册页面
+              this.isShowSheet = true;
+            })
+            //半模态转场
+            .bindSheet($$this.isShowSheet, this.customSheet(), {
+              height: "50%",
+              showClose: false
+            })
+        }
+          .padding({ left: 10, right: 10 })
     }
   }
-}

@@ -1,44 +1,38 @@
-import { rule, userMsg } from '../model/model';
+import { userMsg,rule} from '../model/model';
+//导入即使反馈模块
 import { PromptAction } from '@kit.ArkUI';
 
-// import { PromptAction } from '@ohos.arkui.UIContext';
-//
-// let PromptAction = this.get
 
-// 表单验证
-// 用于验证手机号密码之类的
-export function vaildForm(vaild_obj: userMsg, promptAction: PromptAction): boolean {
+// 表单验证工具(要验证的表单数据对象，即使反馈对象)
+ export function  validForm(valid_obj: userMsg,promptAction:PromptAction): boolean{
+   //开始验证
 
-  //开始验证
-  //获取对象的 key,确定要验证的输入框
-  let keys: string[] = Object.keys(vaild_obj); //拿到了对象键名的字符串数组
+   //获取对象的key，确定要验证的输入框
+   let keys: string[] = Object.keys(valid_obj); //["phone','password','nickName']
 
-  //假设所有表单都验证通过
-  let flag: boolean = true;
+   //假设所有的表单都是验证通过的
+   let flag: boolean = true;
 
-  for (const item of keys) {
-    // console.log("对象的键名=> ", item);
+   //遍历每一个需要验证的数据
+   for (const item of keys){
 
-    // console.log("当前属性的值", JSON.stringify(Object(vaild_obj
-    //)[item]));
+     //拿到当前属性的值 （子对象）
+     let obj: rule = Object(valid_obj)[item];
 
-    //拿到当前属性的值(子对象)
-    let obj: rule = Object(vaild_obj)[item];
-
-    //验证值是否符合规则  => 语法:正则.test("要验证的值")
-    if (!obj.regexpRule.test(obj.val)) {
-      //某个输入框不通过,输出当前错误信息,flag假设不成立,跳出循环
-      console.log(obj.errMsg);
-      //显示错误信息
-      promptAction.showToast({ message: obj.errMsg })
-      flag = false;
-      break;
-    }
-
-    // if(flag){
-    //   console.log("表单验证通过")
-    //   //真正的注册逻辑
-    // }
-  }
-  return flag;
-}
+     //验证当前属性的值是否符合正则规则 => 语法： 正则，test（”要要验证的值“） 返回 boolean
+     //如果当前的验证不通过
+     if(! obj.regexpRule.test( obj.val ) ){
+       //显示错误信息
+       promptAction.showToast({
+         message:obj.errMsg
+       })
+       //假设不成立，有一个验证不通过
+       flag = false;
+       //跳出循环
+       break;
+     }
+   }
+   //如果表单验证通过
+   // console.log("表单验证通过")
+   return flag;
+ }
