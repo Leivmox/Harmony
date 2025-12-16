@@ -4,6 +4,7 @@
     "pages/LoginPage",
     "pages/SearchPage",
     "pages/DetailPage",
-    "pages/MyCollect"
+    "pages/MyCollect",
+    "pages/PersonalInfo"
   ]
 }

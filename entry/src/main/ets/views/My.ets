@@ -26,7 +26,8 @@ export default struct My {
       // 【新增代码】根据点击的标题跳转
       if (title === "我的收藏") {
         router.pushUrl({ url: "pages/MyCollect" })
-        console.info('')
+      } else if (title === "个人资料") {
+        router.pushUrl({ url: "pages/PersonalInfo" })
       }
       // 可以在这里加其他的跳转，比如 "地址管理" 等
     })
@@ -97,13 +98,13 @@ export default struct My {
         }
         .width('95%')
         // 半透明背景
-        .backgroundColor('rgba(255, 255, 255, 0.6)')
+        .backgroundColor('rgba(255, 255, 255, 0.8)')
         // 毛玻璃效果(可选，会让背景图透过来时更好看)
         .backdropBlur(10)
         .borderRadius(12)
         .shadow({ radius: 10, color: '#1A000000', offsetY: 5 })
         .padding({ left: 15, right: 15, bottom: 10 })
-        .margin({ top: 180 })
+        .margin({ top: 190 })
       }
       .width('100%')
       .height('100%')

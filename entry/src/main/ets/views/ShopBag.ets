@@ -152,6 +152,7 @@ export default struct ShopBag {
 
       // 3. 列表区域
       Scroll() {
+        // === 修改点 A：Column ===
         Column() {
           if (!this.user_token.length) {
             Row() {
@@ -162,12 +163,19 @@ export default struct ShopBag {
                   router.pushUrl({ url: "pages/LoginPage" })
                 })
             }
-            .margin({ top: 20 })
+            // 未登录提示也会自动居中，不需要 margin-top 了
           }
           else if (!this.shopbag_list.length) {
-            Text("目前还没有商品 (点击右上角刷新试试)")
-              .margin({ top: 20 })
-              .fontColor(Color.Gray)
+            // === 修改点 B：空状态居中 ===
+            Column() {
+              Text("目前还没有商品 (点击右上角刷新试试)")
+                .fontColor(Color.Gray)
+                .fontSize(14)
+                .textAlign(TextAlign.Center)
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.Center)
+            .alignItems(HorizontalAlign.Center)
           }
           else {
             List() {
@@ -255,16 +263,18 @@ export default struct ShopBag {
             }
           }
         }
-        .justifyContent(FlexAlign.Start)
         .width("100%")
+        // === 修改点 C：核心居中逻辑 ===
+        // 1. 让内部 Column 最小高度占满 Scroll
+        .constraintSize({ minHeight: '100%' })
+        // 2. 如果没有商品(长度为0)，则垂直居中；否则顶部对齐
+        .justifyContent(this.shopbag_list.length === 0 ? FlexAlign.Center : FlexAlign.Start)
       }
       .width("100%")
-      // 【关键修改 1】: 占据剩余所有高度，不再使用 calc
+      // 占据剩余所有高度
       .layoutWeight(1)
-      // 【关键修改 2】: 强制内容顶端对齐
       .align(Alignment.Top)
-      // .width("100%")
-      // .height("calc(100% - 160.8vp)")
+
 
       // 4. 底部结算栏
       Row({ space: 10 }) {
@@ -291,7 +301,6 @@ export default struct ShopBag {
     .backgroundColor(0xefefef)
     // =================================================================
     // 【关键修复】使用 onVisibleAreaChange 监听组件是否可见
-    // 只要组件出现在屏幕上（比例>0.8），就触发刷新。完美解决Tab切换问题。
     // =================================================================
     .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
       // 当组件完全可见时，并且没有正在刷新，则执行刷新

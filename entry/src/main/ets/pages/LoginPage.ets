@@ -243,7 +243,21 @@ struct LoginPage {
                     let key: string = "user_token";
                     let val: string = Object(res).result.token
                     // 【关键修改】传入 getContext(this) 确保上下文正确
-                    saveStorage(key, val, getContext(this));
+                    // saveStorage(key, val, getContext(this));
+
+                    // ====================================================
+                    // 2. 【新增】保存手机号
+                    // ====================================================
+                    // 直接使用 getContext(this)，不要用 context 变量
+                    saveStorage("user_phone", this.userPhone, getContext(this));
+
+                    // ====================================================
+                    // 3. 【新增】保存用户ID (生成假ID)
+                    // ====================================================
+                    let fakeId = "coffe" + new Date().getTime();
+                    // 直接使用 getContext(this)
+                    saveStorage("user_id", fakeId, getContext(this));
+
                     // 确保数据写入 Storage
                     // saveStorage(key, val)
                     console.log("Token已保存，准备跳转");
