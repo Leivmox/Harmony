@@ -8,7 +8,6 @@ import { PromptAction, router } from '@kit.ArkUI';
 import { login, register } from '../api/api';
 import { saveStorage } from '../utils/storage';
 
-
 // //调用网络请求 测试一言
 // hitokoto()
 //   .then(res=>{

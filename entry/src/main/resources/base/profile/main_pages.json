@@ -7,7 +7,6 @@
     "pages/MyCollect",
     "pages/PersonalInfo",
     "pages/SafetyCenter",
-    "pages/AddressManage",
-    "pages/AddressAdd"
+    "pages/AddressManage"
   ]
 }

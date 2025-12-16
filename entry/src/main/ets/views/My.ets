@@ -94,8 +94,8 @@ export default struct My {
             right: 10
           })
           // .onClick(() => {
-            // 点击头部依然可以跳转登录（如果需要的话）
-            // router.pushUrl({ url: "pages/LoginPage" })
+          // 点击头部依然可以跳转登录（如果需要的话）
+          // router.pushUrl({ url: "pages/LoginPage" })
           // })
 
           // --- B. 功能列表 ---

@@ -256,3 +256,15 @@ export function updatePassword(token: string, newPassword: string, oldPassword: 
     oldPassword: oldPassword
   }))
 }
+
+/**
+ * @description 获取个人资料（昵称、头像、简介等）
+ * 请求地址：http://apis.netstart.cn/coffee/findAccountInfo
+ * 请求类型： GET
+ */
+export function findAccountInfo(token: string): Promise<http.HttpResponse> {
+  // 根据文档，参数名是 tokenString
+  return request("/findAccountInfo", "get", Object({
+    tokenString: token
+  }))
+}
