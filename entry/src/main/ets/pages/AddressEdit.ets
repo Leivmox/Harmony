@@ -311,7 +311,7 @@ struct AddressEdit {
         Button('删除', { type: ButtonType.Capsule })
           .backgroundColor(Color.White)
           .fontColor(Color.Red) // 红色文字
-          .border({ width: 1, color: '#EEE' }) // 浅灰边框
+          .border({ width: 1, color: '#EEE' })
           .width('100%')
           .height(45)
           .onClick(() => this.handleDelete())
