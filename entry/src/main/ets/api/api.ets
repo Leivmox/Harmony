@@ -262,8 +262,35 @@ export function updatePassword(token: string, newPassword: string, oldPassword: 
  * 请求地址：http://apis.netstart.cn/coffee/findAccountInfo
  * 请求类型： GET
  */
+/**
+ * 个人资料信息结构
+ * 根据接口文档和通常的返回习惯定义
+ */
+export interface UserInfo {
+  nickName: string;
+  desc: string;
+  userImg: string;
+  // 新增下面这两个字段，使用 ? 表示可选
+  phone?: string;
+  userId?: string;
+}
+
+/**
+ * 通用API响应结构 (用于解决 strict mode 下 res.result.code 报错的问题)
+ */
+export interface ApiResponse<T = Object> {
+  code: string | number; // 有些接口返回 200(number), 有些返回 "200"(string)
+  msg: string;
+  result: T; // 使用泛型，灵活定义 result 的类型
+}
+
+/**
+ * @description 获取个人资料（昵称、头像、简介等）
+ * 请求地址：http://apis.netstart.cn/coffee/findAccountInfo
+ * 请求类型： GET
+ * 参数：tokenString
+ */
 export function findAccountInfo(token: string): Promise<http.HttpResponse> {
-  // 根据文档，参数名是 tokenString
   return request("/findAccountInfo", "get", Object({
     tokenString: token
   }))
@@ -323,3 +350,28 @@ export function deleteAddress(aid: string, token: string): Promise<http.HttpResp
     tokenString: token
   }))
 }
+
+/**
+ * @description 修改昵称接口
+ * 请求地址：http://apis.netstart.cn/coffee/updateNickName
+ * 请求类型： POST
+ */
+export function updateNickName(token: string, newName: string): Promise<http.HttpResponse> {
+  return request("/updateNickName", "post", Object({
+    tokenString: token,
+    nickName: newName
+  }))
+}
+
+/**
+ * @description 修改简介接口
+ * 请求地址：http://apis.netstart.cn/coffee/updateDesc
+ * 请求类型： POST
+ */
+export function updateDesc(token: string, newDesc: string): Promise<http.HttpResponse> {
+  return request("/updateDesc", "post", Object({
+    tokenString: token,
+    desc: newDesc
+  }))
+}
+
