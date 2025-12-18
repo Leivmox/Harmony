@@ -1,5 +1,4 @@
 import { router, promptAction, PromptAction } from '@kit.ArkUI';
-// 1. 只导入 login，不需要 updatePassword (因为服务器不支持)
 import { login } from '../api/api';
 import { saveStorage, getStorage } from '../utils/storage';
 import { validForm } from '../utils/validform';
@@ -23,18 +22,13 @@ struct SafetyCenter {
 
   private promptAction: PromptAction = this.getUIContext().getPromptAction();
 
-  // 统一的退出登录处理函数
   performLogout(msg: string) {
     let context = getContext(this);
-    // 1. 清除 token
     saveStorage("user_token", "", context);
 
-    // 2. 提示信息
     this.promptAction.showToast({ message: msg });
 
-    // 3. 强制跳转 (使用 setTimeout 给 Toast 一点显示时间)
     setTimeout(() => {
-      // 确保路径正确，通常是 pages/LoginPage
       router.replaceUrl({ url: "pages/LoginPage" })
         .then(() => {
           console.info('跳转登录页成功');
@@ -42,7 +36,7 @@ struct SafetyCenter {
         .catch((err: object) => {
           console.error('跳转失败，请检查 pages/LoginPage 是否在 main_pages.json 中配置', JSON.stringify(err));
         })
-    }, 1000) // 延长到1秒，让用户看清提示
+    }, 1000)
   }
 
   handleLogout() {
@@ -60,17 +54,12 @@ struct SafetyCenter {
     })
   }
 
-  // ==========================================================
-  // 【核心修改】模拟修改逻辑
-  // ==========================================================
   handleSubmitChange() {
-    // 1. 基础检查
     if (this.oldPassword === "" || this.newPassword === "") {
       this.promptAction.showToast({ message: "密码不能为空" });
       return;
     }
 
-    // 2. 验证新密码格式
     let checkData = {
       password: {
         val: this.newPassword,
@@ -83,39 +72,27 @@ struct SafetyCenter {
       return;
     }
 
-    // 3. 获取手机号 (用于验证旧密码)
     let context = getContext(this);
     let phone = getStorage("user_phone", context) as string;
 
-    // 如果没取到手机号，说明登录状态有问题
     if (!phone) {
-      // 直接踢回登录页
       this.performLogout("登录信息已失效，请重新登录");
       return;
     }
 
-    // 4. 调用 login 接口验证旧密码是否正确
     login(phone, this.oldPassword)
       .then((res: object) => {
         let response = res as ApiResponse;
 
-        // 如果旧密码能登录成功 (code == 200)
         if (response.result.code == 200) {
           console.log("旧密码验证通过");
 
-          // ============================================
-          // 重点：因为服务器不支持修改密码接口
-          // 我们在这里 "假装" 修改成功
-          // ============================================
 
           this.isShowSheet = false;
 
-          // 调用退出流程，让用户重新登录
-          // 虽然服务器密码没变，但流程在前端是跑通了
           this.performLogout("修改成功，请重新登录");
 
         } else {
-          // code != 200，说明旧密码输错了
           this.promptAction.showToast({
             message: response.result.msg || "旧密码错误，请检查"
           });
@@ -127,9 +104,6 @@ struct SafetyCenter {
       })
   }
 
-  // ==========================================================
-  // UI 部分 (不用动)
-  // ==========================================================
   @Builder
   PasswordInputItem(label: string, val: string, onValChange: (val: string) => void) {
     Row() {

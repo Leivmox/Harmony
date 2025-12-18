@@ -1,5 +1,4 @@
 import { router, promptAction } from '@kit.ArkUI';
-// 1. 【重要】这里必须导入 AddressParams 接口
 import { addAddress, AddressParams } from '../api/api';
 import { BusinessError } from '@kit.BasicServicesKit';
 

@@ -5,28 +5,22 @@ import { deleteAddress, editAddress, findAddressByAid } from '../api/api';
 @Component
 struct AddressEdit {
   @StorageProp('token') token: string = '';
-  // --- 状态变量 (和新增页一样) ---
   @State name: string = '';
   @State phone: string = '';
   @State detail: string = '';
   @State postalCode: string = '';
   @State isDefault: boolean = false;
   @State regionText: string = '';
-  // --- 专门用于编辑的变量 ---
-  @State aid: string = ''; // 当前正在编辑的地址ID
-  // 提交所需字段
+  @State aid: string = '';
   private province: string = '';
   private city: string = '';
   private county: string = '';
   private areaCode: string = '000000';
 
-  // --- 页面加载时执行：获取参数并查询详情 ---
   aboutToAppear() {
-    // 1. 获取上个页面传来的 aid
     const params = router.getParams() as Record<string, string>;
     if (params && params['aid']) {
       this.aid = params['aid'];
-      // 2. 拿着 aid 去服务器查最新详情
       this.loadAddressDetail();
     } else {
       promptAction.showToast({ message: '参数错误' });
@@ -34,14 +28,12 @@ struct AddressEdit {
     }
   }
 
-  // --- 逻辑：加载详情数据进行回显 ---
   async loadAddressDetail() {
     try {
       console.info('正在请求详情 aid:', this.aid);
 
       let res = await findAddressByAid(this.aid, this.token);
 
-      // 1. 解析最外层数据
       let resData: Record<string, Object>;
       if (typeof res.result === 'string') {
         resData = JSON.parse(res.result) as Record<string, Object>;
@@ -49,26 +41,18 @@ struct AddressEdit {
         resData = res.result as Record<string, Object>;
       }
 
-      // 打印完整日志，用于调试！
       console.info('接口返回详情:', JSON.stringify(resData));
 
-      // if (resData.code == 200 || resData.code == 20000) {
       if (resData.code == 200 || resData.code == 20000 || resData.code == 40000) {
-        // 2. 提取 result
-        // 很多时候 result 是一个数组 [ {...} ]，但也可能直接是对象
         let resultData = resData.result;
         let info: Record<string, Object> = {};
 
         if (Array.isArray(resultData) && resultData.length > 0) {
-          // 如果是数组，取第一个
           info = resultData[0] as Record<string, Object>;
         } else if (resultData && !Array.isArray(resultData)) {
-          // 如果直接是对象
           info = resultData as Record<string, Object>;
         }
 
-        // 3. 赋值给状态变量 (使用 ['key'] 方式访问更安全)
-        // 使用 || '' 防止字段为 null/undefined 时报错或不显示
         this.name = (info['name'] as string) || '';
         this.phone = (info['tel'] as string) || '';
         this.province = (info['province'] as string) || '';
@@ -77,11 +61,9 @@ struct AddressEdit {
         this.detail = (info['addressDetail'] as string) || '';
         this.postalCode = (info['postalCode'] as string) || '';
 
-        // 转换 isDefault (注意：后端可能返回数字 1/0，也可能返回字符串 "1"/"0")
         let isDefaultVal = info['isDefault'];
         this.isDefault = (Number(isDefaultVal) === 1);
 
-        // 拼接地区显示文本
         if (this.province && this.city && this.county) {
           this.regionText = `${this.province} ${this.city} ${this.county}`;
         } else {
@@ -99,7 +81,6 @@ struct AddressEdit {
     }
   }
 
-  // --- 逻辑：保存修改 ---
   async handleSave() {
     if (!this.name || !this.phone || !this.regionText || !this.detail) {
       promptAction.showToast({ message: '请完善信息' });
@@ -132,7 +113,6 @@ struct AddressEdit {
 
       let code = Number(resData['code']);
 
-      // 【关键修改】加入 30000
       if (code === 200 || code === 20000 || code === 30000 || code === 40000) {
         promptAction.showToast({ message: '修改成功' });
         setTimeout(() => router.back(), 500);
@@ -145,7 +125,6 @@ struct AddressEdit {
   }
 
 
- // --- 逻辑：删除地址 ---
   async handleDelete() {
     AlertDialog.show({
       title: '提示',
@@ -168,7 +147,6 @@ struct AddressEdit {
 
             let code = Number(resData['code']);
 
-            // 【关键修改】加入 30000
             if (code === 200 || code === 20000 || code === 10000 || code === 40000) {
               promptAction.showToast({ message: '删除成功' });
               setTimeout(() => router.back(), 500);
@@ -183,10 +161,9 @@ struct AddressEdit {
     })
   }
 
-  // --- 地区选择器 (保持不变) ---
   selectRegion() {
     TextPickerDialog.show({
-      range: ['北京市 北京市 东城区', '广东省 广州市 天河区', '上海市 上海市 浦东新区'], // 这里应该是真实数据
+      range: ['北京市 北京市 东城区', '广东省 广州市 天河区', '上海市 上海市 浦东新区'],
       onAccept: (value: TextPickerResult) => {
         this.regionText = value.value as string;
         let parts = this.regionText.split(' ');
@@ -199,7 +176,6 @@ struct AddressEdit {
     })
   }
 
-  // --- UI 构建器 (和 Add 页面一样) ---
   @Builder
   InputRow(title: string, val: string, onChange: (v: string) => void) {
     Row() {
@@ -214,14 +190,13 @@ struct AddressEdit {
 
   build() {
     Column() {
-      // 1. 顶部导航
       Row() {
         Row() {
           Text("< 返回").fontColor('#0C34BA').fontSize(16)
         }
         .height('100%').onClick(() => router.back()).padding({ left: 15, right: 15 })
 
-        Text("编辑地址") // 标题变了
+        Text("编辑地址")
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
           .layoutWeight(1)
@@ -230,13 +205,10 @@ struct AddressEdit {
       }
       .width("100%").height(56).backgroundColor(Color.White)
 
-      // 2. 表单区域
       Column() {
 
-        // --- 1. 姓名 (直接写，不调 InputRow) ---
         Row() {
           Text('姓名').width(80).fontSize(16).fontColor('#333')
-          // 直接绑定 this.name，确保回显成功
           TextInput({ text: this.name })
             .layoutWeight(1).backgroundColor(Color.Transparent)
             .onChange((v) => this.name = v)
@@ -244,7 +216,6 @@ struct AddressEdit {
         .height(55).width('100%').alignItems(VerticalAlign.Center)
         .border({ width: { bottom: 0.5 }, color: '#EEE' })
 
-        // --- 2. 电话 ---
         Row() {
           Text('电话').width(80).fontSize(16).fontColor('#333')
           TextInput({ text: this.phone })
@@ -254,7 +225,6 @@ struct AddressEdit {
         .height(55).width('100%').alignItems(VerticalAlign.Center)
         .border({ width: { bottom: 0.5 }, color: '#EEE' })
 
-        // --- 3. 地区 (你原来这段就是好的，保持不变) ---
         Row() {
           Text('地区').width(80).fontSize(16).fontColor('#333')
           Text(this.regionText || '请选择').layoutWeight(1).fontColor('#333')
@@ -266,7 +236,6 @@ struct AddressEdit {
         .border({ width: { bottom: 0.5 }, color: '#EEE' })
         .onClick(() => this.selectRegion())
 
-        // --- 4. 详细地址 ---
         Row() {
           Text('详细地址').width(80).fontSize(16).fontColor('#333')
           TextInput({ text: this.detail })
@@ -276,7 +245,6 @@ struct AddressEdit {
         .height(55).width('100%').alignItems(VerticalAlign.Center)
         .border({ width: { bottom: 0.5 }, color: '#EEE' })
 
-        // --- 5. 邮政编码 ---
         Row() {
           Text('邮政编码').width(80).fontSize(16).fontColor('#333')
           TextInput({ text: this.postalCode })
@@ -299,18 +267,15 @@ struct AddressEdit {
       .height(55).backgroundColor(Color.White).borderRadius(8)
       .margin({ left: 15, right: 15, top: 15 }).padding({ left: 15, right: 15 })
 
-      // 4. 底部按钮区 (保存 + 删除)
       Column({ space: 15 }) {
-        // 保存按钮
         Button('保存', { type: ButtonType.Capsule })
           .backgroundColor('#0C34BA')
           .width('100%').height(45)
           .onClick(() => this.handleSave())
 
-        // 删除按钮 (白色背景，红色字，带边框)
         Button('删除', { type: ButtonType.Capsule })
           .backgroundColor(Color.White)
-          .fontColor(Color.Red) // 红色文字
+          .fontColor(Color.Red)
           .border({ width: 1, color: '#EEE' })
           .width('100%')
           .height(45)

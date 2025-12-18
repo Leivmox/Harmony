@@ -22,7 +22,6 @@ struct MyCollect {
     }
   }
 
-  // 获取数据逻辑 (保持不变)
   getCollectData() {
     this.isLoading = true;
     findAllLike(this.user_token)
@@ -62,7 +61,6 @@ struct MyCollect {
       })
   }
 
-  // 删除收藏逻辑 (保持不变)
   removeItem(pid: string, index: number) {
     AlertDialog.show({
       title: '提示',
@@ -90,7 +88,6 @@ struct MyCollect {
 
   build() {
     Column() {
-      // 1. 顶部导航栏
       Row() {
         Row() {
           Text("< 返回")
@@ -116,42 +113,33 @@ struct MyCollect {
       .backgroundColor(Color.White)
       .zIndex(2)
 
-      // 2. 下方层叠区域
       Stack({ alignContent: Alignment.Top }) {
 
-        // (A) 蓝色背景填充
         Column()
           .width('100%')
           .height(130)
           .backgroundColor('#0C34BA')
 
-        // (B) 核心内容大框
         Column() {
           Scroll() {
-            // 内部容器 Column
             Column() {
               if (!this.isLoading && this.collectList.length === 0) {
-                // === 空状态修改开始 ===
-                Column({ space: 15 }) { // 增加一点间距
-                  Image($r('app.media.Null')) // 图片改为 Null
-                    .width(120) // 稍微调大一点图片，根据实际效果调整
+                Column({ space: 15 }) {
+                  Image($r('app.media.Null'))
+                    .width(120)
                     .objectFit(ImageFit.Contain)
 
-                  Text("没有收藏数据!") // 文字修改
+                  Text("没有收藏数据!")
                     .fontColor('#999')
                     .fontSize(15)
                 }
-                // 去掉 margin top，完全靠父容器居中
-                // === 空状态修改结束 ===
               }
               else {
-                // 商品列表容器
                 Flex({
                   wrap: FlexWrap.Wrap,
                   justifyContent: FlexAlign.SpaceBetween
                 }) {
                   ForEach(this.collectList, (item: productItem, index: number) => {
-                    // 单个商品项
                     Column() {
                       Image(item.smallImg)
                         .width("100%")
@@ -208,11 +196,8 @@ struct MyCollect {
               }
             }
             .width('100%')
-            // 【核心逻辑】让内部 Column 最小高度撑满父容器
             .constraintSize({ minHeight: '100%' })
-            // 【核心逻辑】如果没有数据，居中对齐；如果有数据，顶部对齐
             .justifyContent(this.collectList.length === 0 ? FlexAlign.Center : FlexAlign.Start)
-            // 水平方向同理
             .alignItems(this.collectList.length === 0 ? HorizontalAlign.Center : HorizontalAlign.Start)
           }
           .scrollBar(BarState.Off)

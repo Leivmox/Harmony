@@ -1,6 +1,4 @@
-// 数据接口
 import { findAllShopcart, modifyShopcartCount, removeShopcart } from '../api/api';
-// 购物车数据类型约束
 import { shopBagItem } from '../model/model';
 import { getStorage } from '../utils/storage';
 import { router, promptAction } from '@kit.ArkUI';
@@ -25,7 +23,6 @@ export default struct ShopBag {
   @State count_arr: number[] = [];
   @State user_token: string = "";
 
-  // 添加一个标记，防止短时间内重复刷新
   private isRefreshing: boolean = false;
 
   /**
@@ -64,10 +61,8 @@ export default struct ShopBag {
       .onClick(onClick)
   }
 
-  // 获取购物车商品
   private findAllShopcart() {
     if (this.user_token.length) {
-      // 标记正在刷新
       this.isRefreshing = true;
 
       findAllShopcart(this.user_token)
@@ -75,11 +70,9 @@ export default struct ShopBag {
           let responseBody = res.result as Record<string, Object>;
           let listData = responseBody['result'] as shopBagItem[];
 
-          // 强制覆盖数据
           this.shopbag_list = listData ? listData : [];
           console.log("购物车数据成功加载 =>", JSON.stringify(this.shopbag_list))
 
-          // 初始化数量数组
           let count_arr: number[] = this.shopbag_list.map((v: shopBagItem) => {
             return Number(v.count);
           })
@@ -98,13 +91,11 @@ export default struct ShopBag {
    * 统一的数据初始化方法
    */
   initData() {
-    // 1. 获取 Token
     let token = getStorage("user_token", getContext(this));
     this.user_token = token ? token.toString() : "";
 
     console.log("ShopBag 尝试刷新数据, Token:", this.user_token);
 
-    // 2. 如果有 token，请求数据
     if (this.user_token) {
       this.findAllShopcart();
     } else {
@@ -113,13 +104,11 @@ export default struct ShopBag {
     }
   }
 
-  // 1. 保留 onPageShow，以防你是通过 router 跳转进来的
   onPageShow() {
     console.log("ShopBag onPageShow 触发");
     this.initData();
   }
 
-  // 2. 页面首次加载
   aboutToAppear() {
     console.log("ShopBag aboutToAppear 触发");
     this.initData();
@@ -127,14 +116,12 @@ export default struct ShopBag {
 
   build() {
     Column() {
-      // 1. 顶部导航
       Row() {
         Text("< 返回").fontColor($r("app.color.theme_color"))
           .onClick(() => { router.back() })
 
         Text("购物袋")
 
-        // 【新增】手动刷新按钮，防止自动刷新失效时可以用
         Text("刷新").fontColor($r("app.color.theme_color"))
           .onClick(() => {
             this.initData();
@@ -147,12 +134,9 @@ export default struct ShopBag {
       .justifyContent(FlexAlign.SpaceBetween)
       .backgroundColor(Color.White)
 
-      // 2. 背景
       Image($r("app.media.shopbag_bg")).width("100%")
 
-      // 3. 列表区域
       Scroll() {
-        // === 修改点 A：Column ===
         Column() {
           if (!this.user_token.length) {
             Row() {
@@ -163,10 +147,8 @@ export default struct ShopBag {
                   router.pushUrl({ url: "pages/LoginPage" })
                 })
             }
-            // 未登录提示也会自动居中，不需要 margin-top 了
           }
           else if (!this.shopbag_list.length) {
-            // === 修改点 B：空状态居中 ===
             Column() {
               Text("目前还没有商品 (点击右上角刷新试试)")
                 .fontColor(Color.Gray)
@@ -199,7 +181,6 @@ export default struct ShopBag {
                         Text("￥" + item.price).fontSize(14)
 
                         Row({ space: 10 }) {
-                          // 减号
                           Button("-")
                             .width(24).height(24).padding(0)
                             .backgroundColor(Color.White).fontColor(Color.Red)
@@ -238,7 +219,6 @@ export default struct ShopBag {
                               if (!this.count_arr[index]) this.count_arr[index] = 1;
                             })
 
-                          // 加号
                           Button("+")
                             .width(24).height(24).padding(0)
                             .backgroundColor(Color.Red).type(ButtonType.Circle)
@@ -264,19 +244,14 @@ export default struct ShopBag {
           }
         }
         .width("100%")
-        // === 修改点 C：核心居中逻辑 ===
-        // 1. 让内部 Column 最小高度占满 Scroll
         .constraintSize({ minHeight: '100%' })
-        // 2. 如果没有商品(长度为0)，则垂直居中；否则顶部对齐
         .justifyContent(this.shopbag_list.length === 0 ? FlexAlign.Center : FlexAlign.Start)
       }
       .width("100%")
-      // 占据剩余所有高度
       .layoutWeight(1)
       .align(Alignment.Top)
 
 
-      // 4. 底部结算栏
       Row({ space: 10 }) {
         Row() {
           CheckboxGroup({ group: "shopbagCheckBox" })
@@ -299,11 +274,7 @@ export default struct ShopBag {
     }
     .height("100%")
     .backgroundColor(0xefefef)
-    // =================================================================
-    // 【关键修复】使用 onVisibleAreaChange 监听组件是否可见
-    // =================================================================
     .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
-      // 当组件完全可见时，并且没有正在刷新，则执行刷新
       if (isVisible && currentRatio >= 1.0 && !this.isRefreshing) {
         console.log("ShopBag 可见，触发自动刷新");
         this.initData();

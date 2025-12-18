@@ -1,36 +1,28 @@
 import { promptAction, router } from '@kit.ArkUI';
-import { addAddress, AddressParams } from '../api/api'; // 确保路径正确
+import { addAddress, AddressParams } from '../api/api';
 import { BusinessError } from '@kit.BasicServicesKit';
 
 @Entry
 @Component
 struct AddressAdd {
-  // --- 状态变量 ---
-  @StorageProp('token') token: string = ''; // 获取全局Token
+  @StorageProp('token') token: string = '';
   @State name: string = '';
   @State phone: string = '';
   @State detail: string = '';
   @State postalCode: string = '';
   @State isDefault: boolean = false;
-  // 地区相关变量
-  @State regionText: string = ''; // 用于显示： "广东省 广州市 天河区"
-  // 提交给后端的字段
+  @State regionText: string = '';
   private province: string = '';
   private city: string = '';
   private county: string = '';
-  private areaCode: string = '000000'; // 默认或根据选择器获取
+  private areaCode: string = '000000';
 
-  // --- 逻辑方法 ---
-
-  // 1. 选择地区 (模拟)
   selectRegion() {
     TextPickerDialog.show({
       range: ['北京市 北京市 东城区', '上海市 上海市 黄浦区', '广东省 广州市 天河区', '浙江省 杭州市 西湖区'],
       onAccept: (value: TextPickerResult) => {
-        // 拿到选择的字符串
         this.regionText = value.value as string;
 
-        // 简单拆分数据用于接口提交 (实际项目中应使用三级联动选择器获取对象)
         let parts = this.regionText.split(' ');
         if (parts.length >= 3) {
           this.province = parts[0];
@@ -41,15 +33,12 @@ struct AddressAdd {
     })
   }
 
-  // 2. 保存地址
    async handleSave() {
-    // 1. 检查 Token
     if (!this.token) {
       promptAction.showToast({ message: '未登录或Token失效' });
       return;
     }
 
-    // 2. 简单校验
     if (!this.name || !this.phone || !this.regionText || !this.detail) {
       promptAction.showToast({ message: '请填写完整信息' });
       return;
@@ -59,7 +48,6 @@ struct AddressAdd {
       return;
     }
 
-    // 3. 构造参数
     const params: AddressParams = {
       tokenString: this.token,
       name: this.name,
@@ -74,11 +62,9 @@ struct AddressAdd {
     };
 
     try {
-      // 4. 发起请求
       let res = await addAddress(params);
 
       let resData: Record<string, Object>;
-      // 解析结果
       if (typeof res.result === 'string') {
         try {
           resData = JSON.parse(res.result) as Record<string, Object>;
@@ -92,20 +78,16 @@ struct AddressAdd {
 
       console.info('新增提交结果:', JSON.stringify(resData));
 
-      // 5. 判断业务状态码
-      // 【关键修改】兼容 200, 20000, 10000(常见新增成功), 30000(常见编辑成功)
       let code = Number(resData['code']);
 
       if (code === 200 || code === 20000 || code === 10000 || code === 30000 || code === 9000) {
         promptAction.showToast({ message: '地址添加成功' });
 
-        // 延迟 800ms 后自动返回上一页
         setTimeout(() => {
           router.back();
         }, 800);
 
       } else {
-        // 失败时显示具体信息
         promptAction.showToast({ message: resData['msg'] as string || `添加失败(${code})` });
       }
     } catch (err) {
@@ -114,9 +96,6 @@ struct AddressAdd {
     }
   }
 
-  // --- UI 构建 ---
-
-  // 通用输入行样式封装
   @Builder
   InputRow(title: string, placeholder: string, text: string, onChange: (val: string) => void) {
     Row() {
@@ -137,12 +116,11 @@ struct AddressAdd {
     .height(55)
     .width('100%')
     .alignItems(VerticalAlign.Center)
-    .border({ width: { bottom: 0.5 }, color: '#EEE' }) // 底部细分割线
+    .border({ width: { bottom: 0.5 }, color: '#EEE' })
   }
 
   build() {
     Column() {
-      // 1. 顶部导航
       Row() {
         Row() {
           Text("< 返回")
@@ -167,15 +145,11 @@ struct AddressAdd {
       .height(56)
       .backgroundColor(Color.White)
 
-      // 2. 表单内容区域
       Column() {
-        // 姓名
         this.InputRow('姓名', '请输入姓名', this.name, (val) => this.name = val)
 
-        // 电话
         this.InputRow('电话', '请输入手机号', this.phone, (val) => this.phone = val)
 
-        // 地区选择
         Row() {
           Text('地区')
             .width(80)
@@ -200,10 +174,8 @@ struct AddressAdd {
           this.selectRegion()
         })
 
-        // 详细地址
         this.InputRow('详细地址', '街道门牌、楼层房间号等信息', this.detail, (val) => this.detail = val)
 
-        // 邮政编码
         Row() {
           Text('邮政编码')
             .width(80)
@@ -228,7 +200,6 @@ struct AddressAdd {
       .margin(15)
       .padding({ left: 15, right: 15 })
 
-      // 3. 设为默认地址开关
       Row() {
         Text('设为默认收货地址')
           .fontSize(16)
@@ -247,7 +218,6 @@ struct AddressAdd {
       .margin({ left: 15, right: 15 })
       .padding({ left: 15, right: 15 })
 
-      // 4. 保存按钮
       Button('保存', { type: ButtonType.Capsule })
         .backgroundColor('#0C34BA')
         .width('90%')

@@ -23,19 +23,16 @@ export default struct My {
     .alignItems(VerticalAlign.Center)
     .onClick(() => {
       console.info(`点击了: ${title}`)
-      // 【新增代码】根据点击的标题跳转
       if (title === "我的收藏") {
         router.pushUrl({ url: "pages/MyCollect" })
       } else if (title === "个人资料") {
         router.pushUrl({ url: "pages/PersonalInfo" })
       } else if (title === "安全中心") {
-        router.pushUrl({ url: "pages/SafetyCenter" }) // 确保文件名一致
+        router.pushUrl({ url: "pages/SafetyCenter" })
       } else if (title === "地址管理") {
-        router.pushUrl({ url: "pages/AddressManage" }) // 确保文件名一致
+        router.pushUrl({ url: "pages/AddressManage" })
       }
-      // 可以在这里加其他的跳转，比如 "地址管理" 等
     })
-    // 列表项背景透明
     .backgroundColor(Color.Transparent)
 
     if (showBorder) {
@@ -48,26 +45,16 @@ export default struct My {
   build() {
     Column() {
       Stack({ alignContent: Alignment.Top }) {
-        // ===============================================
-        // 【修改点 1】 底层：背景图 (luckin_bg.jpg)
-        // ===============================================
         Image($r('app.media.luckin_bg'))
           .width('100%')
           .height(235)
-          // 保持比例覆盖，防止图片变形
           .objectFit(ImageFit.Cover)
 
-        // 上层：半透明内容卡片
         Column() {
-          // --- A. 用户信息头部 ---
           Row() {
-            // ===============================================
-            // 【修改点 2】 头像 (luckin.png)
-            // ===============================================
             Image($r('app.media.luckin'))
               .width(70)
               .height(70)
-              // 设置圆角为宽高的一半，强制变圆
               .borderRadius(35)
               .objectFit(ImageFit.Cover)
               .margin({ right: 15 })
@@ -95,12 +82,9 @@ export default struct My {
           })
 
           .onClick(() => {
-            // 点击头部依然可以跳转登录（如果需要的话）
-            // router.pushUrl({ url: "pages/LoginPage" })
             router.pushUrl({ url: "pages/TestToken" })
           })
 
-          // --- B. 功能列表 ---
           Column() {
             ForEach(this.menuList, (item: string, index: number) => {
               this.SettingCell(item, index !== this.menuList.length - 1)
@@ -108,10 +92,7 @@ export default struct My {
           }
         }
         .width('95%')
-        // 半透明背景
         .backgroundColor('rgba(255, 255, 255, 1)')
-        // 毛玻璃效果(可选，会让背景图透过来时更好看)
-        // .backdropBlur(10)
         .borderRadius(12)
         .shadow({ radius: 10, color: '#1A000000', offsetY: 5 })
         .padding({ left: 15, right: 15, bottom: 10 })

@@ -1,7 +1,7 @@
 import { router, promptAction } from '@kit.ArkUI';
 import { findAddress } from '../api/api';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { getStorage } from '../utils/storage'; // 1. 导入读取工具
+import { getStorage } from '../utils/storage';
 
 interface AddressItem {
   id: number | string;
@@ -14,61 +14,41 @@ interface AddressItem {
 @Entry
 @Component
 struct AddressManage {
-  // @StorageProp 会监听 AppStorage 中的 'token' 变化
-  // 刚重启时，AppStorage为空，所以这里初始值是 ''
   @StorageProp('token') token: string = '';
   @State addressList: AddressItem[] = [];
   @State isLoading: boolean = false;
 
-  // 【核心修改】页面即将出现时，执行“复活”Token的逻辑
   async aboutToAppear() {
-    // 1. 如果内存里已经有token（比如是从登录页刚跳过来的），直接请求数据
     if (this.token) {
       console.info('【Token状态】内存中存在，直接请求');
       this.getAddressList();
     } else {
-      // 2. 如果内存里没有（比如刚重启APP），尝试去硬盘捞一下
       console.info('【Token状态】内存为空，尝试读取硬盘...');
       let context = getContext(this);
 
-      // 注意：这里需要 await，因为读取硬盘通常是异步的
-      // 这里的 key "user_token" 必须和你 LoginPage 里存的一模一样
       let diskToken = await getStorage("user_token", context);
 
       if (diskToken) {
         console.info('【Token状态】硬盘中找到了！复活Token');
 
-        // 3. 将硬盘读出来的 Token 塞回 AppStorage (内存)
-        // 这一步之后，this.token 会自动更新，其他页面也能用
         AppStorage.setOrCreate('token', diskToken as string);
 
-        // 4. 拿到 Token 后，手动调用请求 (传入刚读到的 token，防止 this.token 更新延迟)
         this.getAddressList(diskToken as string);
       } else {
         console.warn('【Token状态】硬盘里也没有，确实未登录');
         promptAction.showToast({ message: '请先登录' });
 
-        // 可选：强制跳转回登录页
-        // setTimeout(() => {
-        //   router.replaceUrl({ url: 'pages/LoginPage' });
-        // }, 1000);
       }
     }
   }
 
-  // 页面显示时触发 (比如从编辑页回来)
   onPageShow() {
-    // 如果已经有数据，且 token 存在，可以在这里刷新
     if (this.token) {
       this.getAddressList();
     }
   }
 
-  // 【修改】接收一个可选参数 useToken
-  // 因为 @StorageProp 更新有微小的延迟，如果在 aboutToAppear 里刚 set 完马上用 this.token 可能会是空的
-  // 所以允许直接传一个 token 进来用
   async getAddressList(useToken?: string) {
-    // 优先使用传入的 token，如果没有则使用 this.token
     let finalToken = useToken || this.token;
 
     if (!finalToken) {
@@ -111,7 +91,6 @@ struct AddressManage {
         });
 
       } else {
-        // 如果 Token 过期 (code 401 等)，这里应该处理退出登录逻辑
         promptAction.showToast({ message: resData.msg as string || '获取失败' });
       }
 
@@ -159,14 +138,12 @@ struct AddressManage {
 
   build() {
     Column() {
-      // 导航栏
       Row() {
         Row() { Text("< 返回").fontColor('#0C34BA').fontSize(16) }
         .height('100%').onClick(() => router.back()).padding({ left: 15, right: 15 })
         Text("地址管理").fontSize(18).fontWeight(FontWeight.Bold).layoutWeight(1).textAlign(TextAlign.Center).padding({ right: 60 })
       }.width("100%").height(56).backgroundColor(Color.White)
 
-      // 列表区域
       if (this.isLoading && this.addressList.length === 0) {
         Column() { Text('加载中...').fontColor('#999').margin({top: 50}) }.width('100%').layoutWeight(1)
       } else if (this.addressList.length === 0) {
@@ -180,7 +157,6 @@ struct AddressManage {
         .width('100%').layoutWeight(1).padding({ left: 15, right: 15, top: 15 })
       }
 
-      // 底部按钮
       Column() {
         Button("新增地址")
           .width('100%').height(50).backgroundColor('#0C34BA').borderRadius(25)
