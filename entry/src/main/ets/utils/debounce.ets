@@ -29,13 +29,11 @@
 export function debounce(func: Function, wait: number) {
   let timer: number | null = null;
 
-  // 使用联合类型代替 any，这样 ArkTS 就不会报错了，同时也支持传参
   return (...args: (string | number | boolean | object)[]) => {
     if (timer) {
       clearTimeout(timer);
     }
     timer = setTimeout(() => {
-      // 这里的 ...args 会自动传给你的业务函数 (func)
       func(...args);
     }, wait);
   }

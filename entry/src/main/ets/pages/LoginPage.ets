@@ -1,7 +1,7 @@
 //导入数据格式
 import { userMsg } from '../model/model';
 //导入表单验证模块
-import { validForm } from '../utils/validForm';
+import { validForm } from '../utils/validform';
 //导入及时反馈模/块
 import { PromptAction, router } from '@kit.ArkUI';
 //导入注册,登录接口

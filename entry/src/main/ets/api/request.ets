@@ -31,10 +31,6 @@ function queryString(obj: object) {
 export function request(url: string, method: string, params: object) {
   let httpRequest = http.createHttp();
 
-  // =========================================================
-  // 【修复 1：ArkTS 不支持对象扩展运算符 ...params】
-  // 替代方案：手动创建一个新对象，并将 params 的属性复制进去
-  // =========================================================
 
   let requestParams: Record<string, Object> = {};
 
@@ -49,12 +45,7 @@ export function request(url: string, method: string, params: object) {
 
   // 3. 添加 appkey
   requestParams['appkey'] = APPKEY;
-
   console.info(`[HTTP] 请求: ${url}, 方式: ${method}, 参数: ${JSON.stringify(requestParams)}`);
-
-  // =========================================================
-  // 【修复 2：区分 GET 和 POST 的参数发送位置】
-  // =========================================================
 
   let fullUrl = BASEURL + url;
   let finalExtraData: string | Object | undefined = undefined;

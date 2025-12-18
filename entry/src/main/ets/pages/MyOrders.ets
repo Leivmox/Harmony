@@ -2,7 +2,7 @@ import { promptAction, router } from '@kit.ArkUI';
 import { confirmReceive, findOrder, removeOrder } from '../api/api';
 import { getStorage } from '../utils/storage';
 
-// 1. 定义数据接口 (保持之前的修复逻辑)
+// 1. 定义数据接口
 interface OrderProduct {
   pid: string;
   name: string;
@@ -34,9 +34,7 @@ struct MyOrders {
   // Tab 菜单
   private tabs: string[] = ['全部', '进行中', '已完成'];
 
-  // =======================================================
   // 生命周期
-  // =======================================================
   async aboutToAppear() {
     let context = getContext(this);
     try {
@@ -59,12 +57,8 @@ struct MyOrders {
     }
   }
 
-  // =======================================================
-  // 核心业务逻辑 (保持之前的扁平化数据修复)
-  // =======================================================
-  // =======================================================
-  // 核心业务逻辑 (已修复：按 OID 合并订单)
-  // =======================================================
+
+  // 核心业务逻辑
   async getOrderList() {
     if (!this.token) {
       return;
@@ -91,7 +85,7 @@ struct MyOrders {
         list = resData.orderList as Array<Record<string, Object>>;
       }
 
-      // 🔥🔥🔥 核心修复开始：使用 Map 进行分组 🔥🔥🔥
+      // 使用 Map 进行分组
       let orderMap = new Map<string, OrderItem>();
 
       list.forEach((item: Record<string, Object>) => {
@@ -120,7 +114,7 @@ struct MyOrders {
           existingOrder.products.push(product);
           existingOrder.count += countVal;
 
-          // 累加金额 (先转数字相加，最后统一转字符串)
+          // 累加金额
           let currentTotal = parseFloat(existingOrder.total) + lineTotal;
           existingOrder.total = currentTotal.toFixed(2);
 
@@ -140,7 +134,6 @@ struct MyOrders {
 
       // 3. 将 Map 转回数组
       this.orderList = Array.from(orderMap.values());
-      // 🔥🔥🔥 核心修复结束 🔥🔥🔥
 
     } catch (err) {
       promptAction.showToast({ message: '数据加载失败' });
@@ -172,10 +165,7 @@ struct MyOrders {
       })
   }
 
-  // =======================================================
   // UI 构建
-  // =======================================================
-
   @Builder
   OrderCard(item: OrderItem) {
     Column() {
@@ -211,9 +201,8 @@ struct MyOrders {
       }
       .width("100%").justifyContent(FlexAlign.SpaceBetween).padding({ bottom: 15 })
 
-      // 3. 商品列表 (这里之前有两层 ForEach，现在只保留一层)
+      // 3. 商品列表
       Column() {
-        // 🔥🔥🔥 修复点：只保留这一层 ForEach 🔥🔥🔥
         ForEach(item.products, (prod: OrderProduct) => {
           Row() {
             // 左侧图片
@@ -300,14 +289,14 @@ struct MyOrders {
     }
     .width("95%")
     .backgroundColor(Color.White)
-    .borderRadius(12) // 统一圆角
+    .borderRadius(12)
     .padding(15)
     .margin({ bottom: 15 })
   }
 
   build() {
     Column() {
-      // 1. 顶部标题栏 (固定)
+      // 1. 顶部标题栏
       Row() {
         Row() {
           Text("< 返回").fontColor('#0C34BA').fontSize(16)
@@ -325,16 +314,12 @@ struct MyOrders {
       }
       .width("100%").height(56).backgroundColor(Color.White).zIndex(99)
 
-      // 2. Stack 布局 (模仿 PersonalInfo)
       Stack({ alignContent: Alignment.Top }) {
 
-        // 层级1：蓝色背景条
         Column().width('100%').height(130).backgroundColor('#0C34BA')
 
-        // 层级2：主要内容区域
         Column() {
 
-          // (1) Tabs 卡片 - 就像 PersonalInfo 的白色卡片一样悬浮
           Row() {
             ForEach(this.tabs, (item: string, index: number) => {
               Column() {
@@ -357,16 +342,16 @@ struct MyOrders {
               })
             })
           }
-          .width('95%') // 宽度与 PersonalInfo 一致
-          .height(60) // Tab 高度
+          .width('95%')
+          .height(60)
           .backgroundColor(Color.White)
           .borderRadius({
             topLeft: 12,
             topRight: 12,
             bottomLeft: 0,
             bottomRight: 0
-          }) // 圆角一致
-          .margin({ top: 90 }) // 🔥🔥🔥 关键：距离顶部 90，产生悬浮效果
+          })
+          .margin({ top: 90 })
           // .shadow({ radius: 10, color: 'rgba(0,0,0,0.1)', offsetY: 5 })
 
           // (2) 订单列表区域
@@ -386,18 +371,18 @@ struct MyOrders {
               })
             }
             .width("100%")
-            .layoutWeight(1) // 占据剩余空间
-            .margin({ top: 15 }) // 列表和 Tab 的间距
+            .layoutWeight(1)
+            .margin({ top: 15 })
             .scrollBar(BarState.Off)
-            .alignListItem(ListItemAlign.Center) // 让列表项居中
+            .alignListItem(ListItemAlign.Center)
           }
 
         }
         .width('100%')
-        .height('100%') // 内容层撑满
+        .height('100%')
       }
       .layoutWeight(1)
-      .backgroundColor('#F5F5F5') // 🔥 底层背景色改为浅灰
+      .backgroundColor('#F5F5F5')
     }
     .width("100%").height("100%")
   }

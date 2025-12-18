@@ -30,7 +30,7 @@ struct DetailPage {
     //通过路由参数获取商品ID
     this.pid = Object(params).pid || "fruit_tea005";
 
-    //获取用户的token(有token就有登录，没有token就没有登录)
+    //获取用户的token
     this.user_token = getStorage("user_token") as string;
     console.log("用户token =>",this.user_token)
 
@@ -60,7 +60,7 @@ struct DetailPage {
             let obj: product_rule_item = { };
             obj.desc = Object((this.product_detail)[0])[item+"_desc"];
             obj.idx = 0; //默认选中的规格索引
-            obj.arr = Object((this.product_detail)[0])[item].split("/"); //规格右边的按钮，是一个数组
+            obj.arr = Object((this.product_detail)[0])[item].split("/");
             console.log("小规格对象 =>",JSON.stringify(obj))
             Object(product_rule)[item]= obj;
           }
@@ -125,7 +125,6 @@ struct DetailPage {
       .padding({ left: 10, right: 10 })
 
       Scroll() {
-        // 将所有内容包裹在一个Column容器中
         Column() {
           // 第一个Column：图片、名称价格、商品规格
             // 2.图片

@@ -22,7 +22,7 @@ struct MyCollect {
     }
   }
 
-  // 获取数据逻辑 (保持不变)
+  // 获取数据逻辑
   getCollectData() {
     this.isLoading = true;
     findAllLike(this.user_token)
@@ -62,7 +62,7 @@ struct MyCollect {
       })
   }
 
-  // 删除收藏逻辑 (保持不变)
+  // 删除收藏逻辑
   removeItem(pid: string, index: number) {
     AlertDialog.show({
       title: '提示',

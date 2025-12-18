@@ -1,7 +1,7 @@
-import { router, promptAction } from '@kit.ArkUI';
+import { promptAction, router } from '@kit.ArkUI';
 import { shopBagItem } from '../model/model';
 import { getStorage } from '../utils/storage';
-import { findAddress, pay, deleteShopCart } from '../api/api';
+import { deleteShopCart, findAddress, pay } from '../api/api';
 
 // 定义地址接口
 interface AddressItem {
@@ -18,13 +18,11 @@ struct OrderSettle {
   // 接收上个页面传来的参数
   @State orderList: shopBagItem[] = [];
   @State totalPrice: string = "0.00";
-
   // 地址相关状态
   @State addressList: AddressItem[] = [];
   @State currentAddress: AddressItem | null = null;
   @State isShowAddressSheet: boolean = false;
   @State isLoadingAddress: boolean = false;
-
   // 内存中的 Token
   @StorageProp('token') token: string = '';
 
@@ -36,7 +34,7 @@ struct OrderSettle {
       this.totalPrice = params['total'] as string || "0.00";
     }
 
-    // 2. 双重保险获取 Token
+    // 2. 获取 Token
     let finalToken = this.token;
     if (!finalToken) {
       try {
@@ -57,13 +55,7 @@ struct OrderSettle {
     }
   }
 
-  // =============================================================
-  // 【核心修复】onPageShow 逻辑修改
-  // =============================================================
   onPageShow() {
-    // 之前这里写了: if(this.token && this.addressList.length === 0)
-    // 导致你去新增地址回来后，列表不为空，就不刷新了。
-    // 现在改为：只要有 Token，每次回到这个页面，都静默刷新一次最新地址。
     if (this.token) {
       console.info('[OrderSettle] 页面显示，刷新地址列表...');
       this.getAddressList(this.token);
@@ -73,11 +65,10 @@ struct OrderSettle {
   // 获取地址列表
   async getAddressList(useToken?: string) {
     let targetToken = useToken || this.token;
-    if (!targetToken) return;
+    if (!targetToken) {
+      return;
+    }
 
-    // 注意：如果是 onPageShow 触发的刷新，最好不要把 isLoadingAddress 设为 true，
-    // 否则用户每次回来都会看到 loading 闪烁一下，体验不好。
-    // 这里我们做一个简单处理：只有列表为空时才显示 loading
     if (this.addressList.length === 0) {
       this.isLoadingAddress = true;
     }
@@ -85,7 +76,8 @@ struct OrderSettle {
     try {
       let res = await findAddress(targetToken);
 
-      let resData: Record<string, Object> = (typeof res.result === 'string' ? JSON.parse(res.result) : res.result) as Record<string, Object>;
+      let resData: Record<string, Object> =
+        (typeof res.result === 'string' ? JSON.parse(res.result) : res.result) as Record<string, Object>;
 
       let originList: Array<Record<string, Object>> = [];
       if (Array.isArray(resData.result)) {
@@ -104,7 +96,6 @@ struct OrderSettle {
         } as AddressItem;
       });
 
-      // 逻辑：如果当前没有选中的地址，或者当前选中的地址不在新列表里了，就重新选一个
       let stillExists = false;
       if (this.currentAddress) {
         stillExists = this.addressList.some(item => item.id === this.currentAddress?.id);
@@ -131,7 +122,9 @@ struct OrderSettle {
         Text("×")
           .fontSize(28)
           .fontColor(Color.Gray)
-          .onClick(() => { this.isShowAddressSheet = false; })
+          .onClick(() => {
+            this.isShowAddressSheet = false;
+          })
       }
       .width("100%")
       .justifyContent(FlexAlign.SpaceBetween)
@@ -142,17 +135,15 @@ struct OrderSettle {
         Column() {
           Text("加载地址中...").fontColor(Color.Gray).margin({ top: 50 })
         }.layoutWeight(1).width('100%')
-      }
-      else if (this.addressList.length === 0) {
+      } else if (this.addressList.length === 0) {
         Column() {
-          Text("暂无收货地址").fontColor(Color.Gray).fontSize(16).margin({top: 50})
+          Text("暂无收货地址").fontColor(Color.Gray).fontSize(16).margin({ top: 50 })
           Text("请点击下方按钮添加").fontColor(Color.Gray).fontSize(14).margin({ top: 5 })
         }
         .layoutWeight(1)
         .width('100%')
         .alignItems(HorizontalAlign.Center)
-      }
-      else {
+      } else {
         List() {
           ForEach(this.addressList, (item: AddressItem) => {
             ListItem() {
@@ -176,10 +167,14 @@ struct OrderSettle {
                     Text(item.phone).fontSize(14).fontColor(Color.Gray)
                     if (item.isDefault) {
                       Text("默认")
-                        .fontSize(10).fontColor(Color.White).backgroundColor($r("app.color.theme_color"))
-                        .padding({ left: 4, right: 4 }).borderRadius(4)
+                        .fontSize(10)
+                        .fontColor(Color.White)
+                        .backgroundColor($r("app.color.theme_color"))
+                        .padding({ left: 4, right: 4 })
+                        .borderRadius(4)
                     }
                   }
+
                   Text(item.address)
                     .fontSize(13).fontColor('#666')
                     .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -227,7 +222,8 @@ struct OrderSettle {
         Text("订单结算").fontSize(18).fontWeight(FontWeight.Bold)
         Text("   ")
       }
-      .width("100%").height(56)
+      .width("100%")
+      .height(56)
       .justifyContent(FlexAlign.SpaceBetween)
       .padding({ left: 15, right: 15 })
       .backgroundColor(Color.White)
@@ -252,8 +248,12 @@ struct OrderSettle {
                 Text(this.currentAddress.name).fontSize(18).fontWeight(FontWeight.Bold)
                 Text(this.currentAddress.phone).fontSize(16)
                 if (this.currentAddress.isDefault) {
-                  Text("默认").fontSize(10).fontColor(Color.White)
-                    .backgroundColor($r("app.color.theme_color")).padding(3).borderRadius(4)
+                  Text("默认")
+                    .fontSize(10)
+                    .fontColor(Color.White)
+                    .backgroundColor($r("app.color.theme_color"))
+                    .padding(3)
+                    .borderRadius(4)
                 }
               }
               .width('100%').margin({ bottom: 5 })
@@ -365,8 +365,7 @@ struct OrderSettle {
             }
 
             try {
-              // 3. 调用结算接口 (在服务器创建订单)
-              // 注意：这里我们传入了地址对象里的信息
+              // 3. 调用结算接口
               let payRes = await pay(
                 this.token,
                 sids,
@@ -375,19 +374,11 @@ struct OrderSettle {
                 this.currentAddress.name
               );
 
-              // 简单判断一下 code，具体根据实际接口返回调整
-              // 通常 code===200 或 '001' 表示成功，这里假设不报错就是成功
               console.info('下单成功:', payRes.result);
-
-              // 4. 下单成功后，调用删除购物车接口 (清空已买商品)
               await deleteShopCart(this.token, sids);
-
               promptAction.showToast({ message: '支付成功，正在返回...' });
 
-              // 5. 延迟返回，给用户一点反应时间
-              setTimeout(() => {
-                router.back();
-              }, 800);
+              router.back();
 
             } catch (err) {
               console.error('结算流程失败:', JSON.stringify(err));

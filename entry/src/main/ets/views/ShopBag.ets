@@ -3,11 +3,11 @@ import { findAllShopcart, modifyShopcartCount, removeShopcart } from '../api/api
 // 购物车数据类型约束
 import { shopBagItem } from '../model/model';
 import { getStorage } from '../utils/storage';
-import { router, promptAction } from '@kit.ArkUI';
+import { promptAction, router } from '@kit.ArkUI';
 import { debounce } from '../utils/debounce';
 
 /**
- * @description 修改购物车商品数量(防抖)
+ * @description 修改购物车商品数量
  */
 let f = debounce((token: string, sid: string, count: string) => {
   modifyShopcartCount(token, sid, count)
@@ -22,18 +22,16 @@ let f = debounce((token: string, sid: string, count: string) => {
 export default struct ShopBag {
   // 购物车数据
   @State shopbag_list: shopBagItem[] = [];
-  // 数量数组 (用于本地快速响应UI)
+  // 数量数组
   @State count_arr: number[] = [];
   // Token
   @State user_token: string = "";
-
-  // 【关键】选中状态数组，true代表选中，false代表未选
+  // 是否选中状态数组
   @State select_arr: boolean[] = [];
-  // 【关键】总金额
+  // 总金额
   @State totalPrice: string = "0.00";
-  // 【关键】全选状态
+  // 全选状态
   @State isAllSelected: boolean = false;
-
   // 防止重复刷新
   private isRefreshing: boolean = false;
 
@@ -69,7 +67,9 @@ export default struct ShopBag {
    * 删除功能
    */
   deleteItem(index: number) {
-    if (!this.shopbag_list[index]) return;
+    if (!this.shopbag_list[index]) {
+      return;
+    }
 
     let sids: string[] = [];
     sids.push(this.shopbag_list[index].sid);
@@ -151,12 +151,12 @@ export default struct ShopBag {
 
   build() {
     Column() {
-      // ===========================
       // 1. 顶部导航
-      // ===========================
       Row() {
         Text("< 返回").fontColor($r("app.color.theme_color"))
-          .onClick(() => { router.back() })
+          .onClick(() => {
+            router.back()
+          })
         Text("购物袋")
         Text("刷新").fontColor($r("app.color.theme_color"))
           .onClick(() => {
@@ -170,56 +170,59 @@ export default struct ShopBag {
       .justifyContent(FlexAlign.SpaceBetween)
       .backgroundColor(Color.White)
 
-      // ===========================
       // 2. 背景图片
-      // ===========================
       Image($r("app.media.shopbag_bg")).width("100%")
 
-      // ===========================
       // 3. 列表区域
-      // ===========================
       Scroll() {
         Column() {
           if (!this.user_token.length) {
             Row() {
               Text("还未登录，先")
               Text("登录").fontColor($r("app.color.theme_color"))
-                .onClick(() => { router.pushUrl({ url: "pages/LoginPage" }) })
+                .onClick(() => {
+                  router.pushUrl({ url: "pages/LoginPage" })
+                })
             }
-            .margin({top: 20})
-          }
-          else if (!this.shopbag_list.length) {
+            .margin({ top: 20 })
+          } else if (!this.shopbag_list.length) {
             Column() {
-              Image($r("app.media.Null")).width(100).height(100).opacity(0.5).margin({bottom:10})
+              Image($r("app.media.Null")).width(100).height(100).opacity(0.5).margin({ bottom: 10 })
               Text("购物车空空如也").fontColor(Color.Gray).fontSize(14)
             }
             .width('100%').justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
-          }
-          else {
+          } else {
             List() {
               ForEach(this.shopbag_list, (item: shopBagItem, index: number) => {
                 ListItem() {
                   Row({ space: 10 }) {
                     // --- 单选框 Checkbox ---
-                    Checkbox({ name: 'item'+index })
-                      .select(this.select_arr[index]) // 绑定选中状态
+                    Checkbox({ name: 'item' + index })
+                    // 绑定选中状态
+                      .select(this.select_arr[index])
                       .onChange((value: boolean) => {
-                        this.select_arr[index] = value; // 更新数组
-                        this.calcTotal(); // 🔥🔥🔥 重点：触发计算
+                        // 更新数组
+                        this.select_arr[index] = value;
+                        // 计算
+                        this.calcTotal();
                       })
 
                     // --- 商品图片 ---
                     Image(item.small_img)
-                      .width(90).height(90)
-                      .borderRadius(4).objectFit(ImageFit.Cover)
+                      .width(90)
+                      .height(90)
+                      .borderRadius(4)
+                      .objectFit(ImageFit.Cover)
                       .backgroundColor('#f5f5f5')
 
                     // --- 商品信息 ---
                     Column() {
                       Row() {
                         Text(item.name)
-                          .fontSize(14).fontWeight(FontWeight.Bold)
-                          .maxLines(1).textOverflow({overflow: TextOverflow.Ellipsis})
+                          .fontSize(14)
+                          .fontWeight(FontWeight.Bold)
+                          .maxLines(1)
+                          .textOverflow({ overflow: TextOverflow.Ellipsis })
                           .layoutWeight(1)
                       }
 
@@ -234,9 +237,13 @@ export default struct ShopBag {
                         Row({ space: 0 }) {
                           // 减号
                           Button("-")
-                            .width(26).height(26).padding(0)
-                            .backgroundColor('#f5f5f5').fontColor('#333')
-                            .type(ButtonType.Normal).borderRadius({topLeft: 13, bottomLeft: 13})
+                            .width(26)
+                            .height(26)
+                            .padding(0)
+                            .backgroundColor('#f5f5f5')
+                            .fontColor('#333')
+                            .type(ButtonType.Normal)
+                            .borderRadius({ topLeft: 13, bottomLeft: 13 })
                             .onClick(() => {
                               if (this.count_arr[index] > 1) {
                                 this.count_arr[index]--;
@@ -249,15 +256,21 @@ export default struct ShopBag {
 
                           // 数量
                           Text(String(this.count_arr[index]))
-                            .width(36).height(26)
-                            .textAlign(TextAlign.Center).fontSize(13)
+                            .width(36)
+                            .height(26)
+                            .textAlign(TextAlign.Center)
+                            .fontSize(13)
                             .backgroundColor('#f5f5f5')
 
                           // 加号
                           Button("+")
-                            .width(26).height(26).padding(0)
-                            .backgroundColor('#f5f5f5').fontColor('#333')
-                            .type(ButtonType.Normal).borderRadius({topRight: 13, bottomRight: 13})
+                            .width(26)
+                            .height(26)
+                            .padding(0)
+                            .backgroundColor('#f5f5f5')
+                            .fontColor('#333')
+                            .type(ButtonType.Normal)
+                            .borderRadius({ topRight: 13, bottomRight: 13 })
                             .onClick(() => {
                               this.count_arr[index]++;
                               f(this.user_token, item.sid, String(this.count_arr[index]));
@@ -269,10 +282,12 @@ export default struct ShopBag {
                     }
                     .layoutWeight(1).alignItems(HorizontalAlign.Start).height(90).justifyContent(FlexAlign.SpaceBetween)
                   }
-                  .padding(10).backgroundColor(Color.White).margin({bottom: 10}).borderRadius(8)
+                  .padding(10).backgroundColor(Color.White).margin({ bottom: 10 }).borderRadius(8)
                 }
                 .swipeAction({
-                  end: this.itemEnd(index, () => { this.deleteItem(index) }),
+                  end: this.itemEnd(index, () => {
+                    this.deleteItem(index)
+                  }),
                   edgeEffect: SwipeEdgeEffect.Spring
                 })
               })
@@ -281,15 +296,13 @@ export default struct ShopBag {
         }
         .constraintSize({ minHeight: '100%' })
         .justifyContent(this.shopbag_list.length === 0 ? FlexAlign.Center : FlexAlign.Start)
-        .padding({left: 10, right: 10, top: 10})
+        .padding({ left: 10, right: 10, top: 10 })
       }
       .layoutWeight(1)
       .align(Alignment.Top)
       .backgroundColor('#f5f5f5')
 
-      // ===========================
       // 4. 底部结算栏
-      // ===========================
       Row() {
         Row() {
           // --- 全选 Checkbox ---
@@ -349,7 +362,12 @@ export default struct ShopBag {
         }
       }
       .width('100%')
-      .padding({ left: 15, right: 15, top: 10, bottom: 10 })
+      .padding({
+        left: 15,
+        right: 15,
+        top: 10,
+        bottom: 10
+      })
       .backgroundColor(Color.White)
       .justifyContent(FlexAlign.SpaceBetween)
     }

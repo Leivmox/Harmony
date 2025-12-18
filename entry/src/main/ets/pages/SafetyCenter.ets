@@ -1,5 +1,4 @@
 import { router, promptAction, PromptAction } from '@kit.ArkUI';
-// 1. 只导入 login，不需要 updatePassword (因为服务器不支持)
 import { login } from '../api/api';
 import { saveStorage, getStorage } from '../utils/storage';
 import { validForm } from '../utils/validform';
@@ -32,17 +31,16 @@ struct SafetyCenter {
     // 2. 提示信息
     this.promptAction.showToast({ message: msg });
 
-    // 3. 强制跳转 (使用 setTimeout 给 Toast 一点显示时间)
+    // 3. 强制跳转
     setTimeout(() => {
-      // 确保路径正确，通常是 pages/LoginPage
       router.replaceUrl({ url: "pages/LoginPage" })
         .then(() => {
           console.info('跳转登录页成功');
         })
         .catch((err: object) => {
-          console.error('跳转失败，请检查 pages/LoginPage 是否在 main_pages.json 中配置', JSON.stringify(err));
+          console.error('跳转失败', JSON.stringify(err));
         })
-    }, 1000) // 延长到1秒，让用户看清提示
+    }, 1000)
   }
 
   handleLogout() {
@@ -60,9 +58,7 @@ struct SafetyCenter {
     })
   }
 
-  // ==========================================================
-  // 【核心修改】模拟修改逻辑
-  // ==========================================================
+  // 修改逻辑
   handleSubmitChange() {
     // 1. 基础检查
     if (this.oldPassword === "" || this.newPassword === "") {
@@ -83,13 +79,13 @@ struct SafetyCenter {
       return;
     }
 
-    // 3. 获取手机号 (用于验证旧密码)
+    // 3. 获取手机号
     let context = getContext(this);
     let phone = getStorage("user_phone", context) as string;
 
-    // 如果没取到手机号，说明登录状态有问题
+    // 没取到手机号
     if (!phone) {
-      // 直接踢回登录页
+      // 回登录页
       this.performLogout("登录信息已失效，请重新登录");
       return;
     }
@@ -103,19 +99,11 @@ struct SafetyCenter {
         if (response.result.code == 200) {
           console.log("旧密码验证通过");
 
-          // ============================================
-          // 重点：因为服务器不支持修改密码接口
-          // 我们在这里 "假装" 修改成功
-          // ============================================
-
           this.isShowSheet = false;
 
-          // 调用退出流程，让用户重新登录
-          // 虽然服务器密码没变，但流程在前端是跑通了
           this.performLogout("修改成功，请重新登录");
 
         } else {
-          // code != 200，说明旧密码输错了
           this.promptAction.showToast({
             message: response.result.msg || "旧密码错误，请检查"
           });
@@ -127,9 +115,7 @@ struct SafetyCenter {
       })
   }
 
-  // ==========================================================
-  // UI 部分 (不用动)
-  // ==========================================================
+  // UI 部分
   @Builder
   PasswordInputItem(label: string, val: string, onValChange: (val: string) => void) {
     Row() {

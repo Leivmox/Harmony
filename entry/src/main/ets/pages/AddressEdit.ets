@@ -5,7 +5,7 @@ import { deleteAddress, editAddress, findAddressByAid } from '../api/api';
 @Component
 struct AddressEdit {
   @StorageProp('token') token: string = '';
-  // --- 状态变量 (和新增页一样) ---
+  // --- 状态变量  ---
   @State name: string = '';
   @State phone: string = '';
   @State detail: string = '';
@@ -132,7 +132,6 @@ struct AddressEdit {
 
       let code = Number(resData['code']);
 
-      // 【关键修改】加入 30000
       if (code === 200 || code === 20000 || code === 30000 || code === 40000) {
         promptAction.showToast({ message: '修改成功' });
         setTimeout(() => router.back(), 500);
@@ -183,7 +182,7 @@ struct AddressEdit {
     })
   }
 
-  // --- 地区选择器 (保持不变) ---
+  // --- 地区选择器  ---
   selectRegion() {
     TextPickerDialog.show({
       range: ['北京市 北京市 东城区', '广东省 广州市 天河区', '上海市 上海市 浦东新区'], // 这里应该是真实数据
@@ -199,7 +198,7 @@ struct AddressEdit {
     })
   }
 
-  // --- UI 构建器 (和 Add 页面一样) ---
+  // --- UI 构建器  ---
   @Builder
   InputRow(title: string, val: string, onChange: (v: string) => void) {
     Row() {
@@ -233,7 +232,7 @@ struct AddressEdit {
       // 2. 表单区域
       Column() {
 
-        // --- 1. 姓名 (直接写，不调 InputRow) ---
+        // --- 1. 姓名  ---
         Row() {
           Text('姓名').width(80).fontSize(16).fontColor('#333')
           // 直接绑定 this.name，确保回显成功
@@ -254,7 +253,7 @@ struct AddressEdit {
         .height(55).width('100%').alignItems(VerticalAlign.Center)
         .border({ width: { bottom: 0.5 }, color: '#EEE' })
 
-        // --- 3. 地区 (你原来这段就是好的，保持不变) ---
+        // --- 3. 地区 ---
         Row() {
           Text('地区').width(80).fontSize(16).fontColor('#333')
           Text(this.regionText || '请选择').layoutWeight(1).fontColor('#333')
