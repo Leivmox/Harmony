@@ -2,7 +2,7 @@ import { router, promptAction, PromptAction } from '@kit.ArkUI';
 // 1. 只导入 login，不需要 updatePassword (因为服务器不支持)
 import { login } from '../api/api';
 import { saveStorage, getStorage } from '../utils/storage';
-import { validForm } from '../utils/validForm';
+import { validForm } from '../utils/validform';
 import { userMsg } from '../model/model';
 
 interface ResultData {
