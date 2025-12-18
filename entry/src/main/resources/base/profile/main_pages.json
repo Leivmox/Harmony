@@ -10,6 +10,8 @@
     "pages/AddressManage",
     "pages/AddressAdd",
     "pages/AddressEdit",
-    "pages/TestToken"
+    "pages/TestToken",
+    "pages/OrderSettle",
+    "pages/MyOrders"
   ]
 }
