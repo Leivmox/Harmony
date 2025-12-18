@@ -2,11 +2,6 @@ import { promptAction, router } from '@kit.ArkUI';
 import { confirmReceive, findOrder, removeOrder } from '../api/api';
 import { getStorage } from '../utils/storage';
 
-/**
- * 我的订单页面
- *
- * @author Leivmox
- */
 interface OrderProduct {
   pid: string;
   name: string;

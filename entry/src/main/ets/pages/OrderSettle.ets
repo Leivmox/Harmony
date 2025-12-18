@@ -6,7 +6,6 @@ import { deleteShopCart, findAddress, pay } from '../api/api';
 /**
  * 提交订单页面
  *
- * @author Leivmox
  */
 interface AddressItem {
   id: number | string;
