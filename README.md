@@ -88,3 +88,7 @@ entry/src/main/ets
 │   ├── ShopBag.ets         # 购物车视图
 │   └── My.ets              # 我的视图
 └── utils/              # 工具类 (防抖, 存储, 验证)
+
+```
+
+<img src="./screenshots/star.png" width="60%"/>
